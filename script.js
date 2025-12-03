@@ -46,7 +46,8 @@ const colorScale = {
     race: ['#e0f3db', '#b8e6b8', '#7bc77e', '#2e7d32', '#1b5e20'],
     white_percent: ['#deebf7', '#9ecae1', '#6baed6', '#3182bd', '#08519c'],
     hispanic_percent: ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'],
-    asian_percent: ['#f2e5ff', '#d4b3ff', '#b794f6', '#9f7aea', '#805ad5']
+    asian_percent: ['#f2e5ff', '#d4b3ff', '#b794f6', '#9f7aea', '#805ad5'],
+    black_percent: ['#e8e8e8', '#bdbdbd', '#969696', '#636363', '#252525']
 };
 
 // Get value for a feature based on current metric (returns percentage)
@@ -101,6 +102,14 @@ function getFeatureValue(feature) {
         
         if (totalPop > 0) {
             return (asian / totalPop) * 100;
+        }
+        return 0;
+    } else if (currentMetric === 'black_percent') {
+        // Calculate Black percentage: (Black / total population) * 100
+        const black = parseFloat(String(props.Black || 0).replace(/,/g, '')) || 0;
+        
+        if (totalPop > 0) {
+            return (black / totalPop) * 100;
         }
         return 0;
     }
@@ -439,6 +448,9 @@ function updateLegend(breaks, colors) {
             break;
         case 'asian_percent':
             metricLabel = 'Asian Percentage';
+            break;
+        case 'black_percent':
+            metricLabel = 'Black Percentage';
             break;
         default:
             metricLabel = 'Percentage';
