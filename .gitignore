@@ -1,0 +1,30 @@
+# Large GeoJSON files
+*.geojson
+
+# Large JSON files (uncomment if needed)
+# cities_final.json
+# cdp_final.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
