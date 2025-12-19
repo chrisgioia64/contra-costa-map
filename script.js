@@ -652,7 +652,7 @@ function updateLegend(breaks, colors) {
             metricLabel = 'White Percentage';
             break;
         case 'hispanic_percent':
-            metricLabel = 'Hispanic Percentage';
+            metricLabel = 'Latino Percentage';
             break;
         case 'asian_percent':
             metricLabel = 'Asian Percentage';

@@ -31,7 +31,7 @@
             top: 10px;
             left: 10px;
             z-index: 1000;
-            background: white;
+            background: #4A90E2;
             padding: 15px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
@@ -41,6 +41,7 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: white;
         }
         
         #metric-select {
@@ -200,13 +201,13 @@
     <div id="map"></div>
     
         <div id="controls">
-            <label for="metric-select">Color By:</label>
+            <label for="metric-select">Data By:</label>
             <select id="metric-select">
-                <option value="white_percent">White Percentage</option>
-                <option value="hispanic_percent">Hispanic Percentage</option>
-                <option value="asian_percent">Asian Percentage</option>
-                <option value="black_percent">Black Percentage</option>
-                <option value="foreign_born">Foreign Born Percentage</option>
+                <option value="white_percent">% White</option>
+                <option value="hispanic_percent">% Latino</option>
+                <option value="asian_percent">% Asian</option>
+                <option value="black_percent">% Black</option>
+                <option value="foreign_born">% Foreign Born</option>
             </select>
         </div>
     
