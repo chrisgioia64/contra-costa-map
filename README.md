@@ -10,9 +10,9 @@ This application visualizes demographic data for Contra Costa County, California
 
 #### 1. **Data Processing Scripts** (Python)
 
-- **`merge_demographics.py`**
+- **`merge_cdp_demographics.py`**
   - Merges demographic CSV data into CDP (Census Designated Place) GeoJSON features
-  - Input: `input/cdp_shapes.json` (GeoJSON with CDP boundaries)
+  - Input: `CDP.geojson` (GeoJSON with CDP boundaries)
   - Output: `cdp_final.json` (GeoJSON with merged demographic data)
   - Matches on `NAMELSAD` property from GeoJSON to `City_Name` or `CDTFA_CITY` from CSV
 
@@ -64,7 +64,7 @@ This application visualizes demographic data for Contra Costa County, California
   - Contains city boundaries with merged demographic data
   - Loaded by the web application for visualization
 
-- **`cdp_final.json`** ✅ **ACTIVE** - Used by `script.js` and `merge_demographics.py`
+- **`cdp_final.json`** ✅ **ACTIVE** - Used by `script.js` and `merge_cdp_demographics.py`
   - Contains CDP (Census Designated Place) boundaries with merged demographic data
   - Loaded by the web application for visualization
 
@@ -81,16 +81,17 @@ This application visualizes demographic data for Contra Costa County, California
   - Likely an intermediate file from coordinate system transformation (EPSG:4326)
   - Not referenced in any scripts
 
-- **`CDP.geojson`** ⚠️ **SOURCE FILE** - Original CDP boundaries
-  - Likely the source file before processing
-  - Not directly used by scripts (scripts expect `input/cdp_shapes.json`)
+- **`CDP.geojson`** ✅ **ACTIVE** - Source CDP boundaries
+  - Contains CDP polygon boundaries with MultiPolygon and Polygon geometries
+  - Used by `merge_cdp_demographics.py` as input
+  - Contains `NAMELSAD` property for matching with CSV data
 
 ### Directory Structure
 
 ```
 demographic-app/
 ├── Python Scripts
-│   ├── merge_demographics.py          # Merges demographics into CDP GeoJSON
+│   ├── merge_cdp_demographics.py      # Merges demographics into CDP GeoJSON
 │   ├── merge_cities_demographics.py   # Merges demographics into Cities GeoJSON
 │   └── verify_merge.py                # Verification utility
 │
@@ -101,13 +102,13 @@ demographic-app/
 ├── Active Data Files
 │   ├── demographics.csv               # Primary demographic data (57 cities)
 │   ├── cities_final.json              # Cities GeoJSON with demographics
-│   └── cdp_final.json                 # CDPs GeoJSON with demographics
+│   ├── cdp_final.json                 # CDPs GeoJSON with demographics
+│   └── CDP.geojson                    # Source CDP boundaries (input for merge script)
 │
 ├── Source/Backup Files (⚠️ Not actively used)
 │   ├── CaliforniaCities.geojson       # Source city boundaries
 │   ├── CaliforniaCities_original.geojson  # Backup
-│   ├── CaliforniaCities_export4326.json   # Intermediate reprojection
-│   └── CDP.geojson                    # Source CDP boundaries
+│   └── CaliforniaCities_export4326.json   # Intermediate reprojection
 │
 └── Directories
     ├── input/                          # Empty (should contain cdp_shapes.json)
@@ -121,8 +122,8 @@ demographic-app/
    - Geographic boundaries are prepared as GeoJSON files
 
 2. **Data Merging:**
-   - Run `merge_demographics.py` to merge demographics into CDP boundaries
-     - Requires: `input/cdp_shapes.json` (not present in repo)
+   - Run `merge_cdp_demographics.py` to merge demographics into CDP boundaries
+     - Requires: `CDP.geojson` (GeoJSON file with CDP polygon boundaries)
      - Produces: `cdp_final.json`
    - Run `merge_cities_demographics.py` to merge demographics into city boundaries
      - Requires: `cities_final.json` (must exist first)
@@ -140,22 +141,15 @@ demographic-app/
 1. **`CaliforniaCities.geojson`** - Source file, not used by scripts
 2. **`CaliforniaCities_original.geojson`** - Backup file
 3. **`CaliforniaCities_export4326.json`** - Intermediate processing file
-4. **`CDP.geojson`** - Source file (scripts expect `input/cdp_shapes.json`)
 
 **Note:** Keep these if you need to reprocess data or maintain source files for version control. Otherwise, they can be moved to an `archive/` or `source/` directory.
-
-## Missing Files
-
-- **`input/cdp_shapes.json`** - Required by `merge_demographics.py` but not present in the repository
-  - This file should contain the CDP boundary GeoJSON data
-  - The script will fail if this file is missing
 
 ## Usage
 
 ### To Process Data:
 ```bash
 # Merge demographics into CDP boundaries
-python merge_demographics.py
+python merge_cdp_demographics.py
 
 # Merge demographics into city boundaries
 python merge_cities_demographics.py

@@ -164,9 +164,19 @@ def merge_demographics(geojson_data, demographics_dict):
         props = feature.get('properties', {})
         namelsad = props.get('NAMELSAD', '').strip()
         
+        # Strip " CDP" suffix from NAMELSAD to match CSV names (e.g., "Bay Point CDP" -> "Bay Point")
+        namelsad_clean = namelsad.replace(' CDP', '').strip()
+        
+        # Try exact match first, then try without CDP suffix
+        match_key = None
         if namelsad in demographics_dict:
+            match_key = namelsad
+        elif namelsad_clean in demographics_dict:
+            match_key = namelsad_clean
+        
+        if match_key:
             # Found a match - inject all CSV columns into properties
-            demo_data = demographics_dict[namelsad]
+            demo_data = demographics_dict[match_key]
             
             for key, value in demo_data.items():
                 # Skip the city name column itself (already in NAMELSAD)
@@ -175,11 +185,19 @@ def merge_demographics(geojson_data, demographics_dict):
                     converted_value = convert_value(value)
                     props[key] = converted_value
             
+            # Remove " CDP" suffix from NAMELSAD in the final output
+            if namelsad.endswith(' CDP'):
+                props['NAMELSAD'] = namelsad_clean
+            
             matched_count += 1
         else:
             # No match found - set demographic fields to null/0
             unmatched_count += 1
             unmatched_names.append(namelsad)
+            
+            # Remove " CDP" suffix from NAMELSAD even if no match found
+            if namelsad.endswith(' CDP'):
+                props['NAMELSAD'] = namelsad_clean
             
             # Set common demographic fields to null if they don't exist
             demo_fields = ['Households', 'Population', 'Latino', 'White', 'Black', 'Asian', 
@@ -207,7 +225,7 @@ def merge_demographics(geojson_data, demographics_dict):
 
 def main():
     # File paths
-    geojson_path = Path('input/cdp_shapes.json')
+    geojson_path = Path('cdp_ccc_84.geojson')
     csv_path = Path('demographics.csv')
     output_path = Path('cdp_final.json')
     

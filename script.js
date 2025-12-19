@@ -255,7 +255,12 @@ function populateDataPanel(feature) {
     const props = feature.properties;
     
     // Get city/place name - use CDTFA_CITY for cities, NAMELSAD for CDPs
-    const name = props.CDTFA_CITY || props.NAMELSAD || 'Unknown';
+    let name = props.CDTFA_CITY || props.NAMELSAD || 'Unknown';
+    
+    // Remove " CDP" suffix from CDP names
+    if (name.endsWith(' CDP')) {
+        name = name.replace(' CDP', '');
+    }
     
     // Get foreign born data - prioritize 'Foreign' and 'Foreign_Born' over 'Foreign Born - Total Pop'
     let foreignBorn = props['Foreign'] || props['Foreign_Born'] || props['Foreign Born - Total Pop'];
@@ -542,9 +547,14 @@ function createLabelLayer(features, isCity) {
         }
         
         // Get label text: CDTFA_CITY for cities, NAMELSAD for CDPs
-        const labelText = isCity 
+        let labelText = isCity 
             ? (feature.properties.CDTFA_CITY || '')
             : (feature.properties.NAMELSAD || '');
+        
+        // Remove " CDP" suffix from CDP labels
+        if (!isCity && labelText.endsWith(' CDP')) {
+            labelText = labelText.replace(' CDP', '');
+        }
         
         if (!labelText) {
             continue;
