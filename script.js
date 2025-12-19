@@ -19,10 +19,8 @@ setTimeout(() => {
     map.setZoom(12);
 }, 500);
 
-// Add zoom controls at bottom-right
-L.control.zoom({
-    position: 'bottomright'
-}).addTo(map);
+// Zoom control will be added after layer visibility control to ensure proper stacking order
+let zoomControl = null;
 
 // Add base tile layer with 50% opacity
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,6 +55,9 @@ let currentBreaks = [0, 0, 0, 0, 0, 0, 0]; // Store current breaks for legend (7
 let legendControl = null; // Legend control reference
 let pieChart = null; // Pie chart instance
 let cityLabelLayer = null; // Leaflet layer group for city labels
+let layerVisibilityControl = null; // Layer visibility checkbox control
+let showCities = true; // Default: show cities
+let showCDPs = true; // Default: show CDPs
 let cdpLabelLayer = null; // Leaflet layer group for CDP labels
 const MIN_ZOOM_FOR_LABELS = 12; // Minimum zoom level to show city labels
 
@@ -746,6 +747,85 @@ function updateLegend(breaks, colors) {
         return div;
     };
     legendControl.addTo(map);
+    
+    // Create and add layer visibility control (checkboxes)
+    createLayerVisibilityControl();
+}
+
+// Create layer visibility control with checkboxes
+function createLayerVisibilityControl() {
+    // Remove existing control if it exists
+    if (layerVisibilityControl) {
+        map.removeControl(layerVisibilityControl);
+    }
+    
+    // Create custom control
+    layerVisibilityControl = L.control({ position: 'bottomright' });
+    layerVisibilityControl.onAdd = function() {
+        const div = L.DomUtil.create('div', 'layer-visibility-control');
+        div.innerHTML = `
+            <div style="background: white; padding: 8px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 12px;">
+                <div style="margin-bottom: 5px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="show-cities-checkbox" ${showCities ? 'checked' : ''} style="margin-right: 5px;">
+                        <span>Show Cities</span>
+                    </label>
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="show-cdps-checkbox" ${showCDPs ? 'checked' : ''} style="margin-right: 5px;">
+                        <span>Show CDPs</span>
+                    </label>
+                </div>
+            </div>
+        `;
+        
+        // Prevent map click when clicking on checkboxes
+        L.DomEvent.disableClickPropagation(div);
+        
+        // Add event listeners
+        const citiesCheckbox = div.querySelector('#show-cities-checkbox');
+        const cdpsCheckbox = div.querySelector('#show-cdps-checkbox');
+        
+        citiesCheckbox.addEventListener('change', function() {
+            showCities = this.checked;
+            if (showCities) {
+                if (cityLayer) cityLayer.addTo(map);
+                if (cityLabelLayer) cityLabelLayer.addTo(map);
+            } else {
+                if (cityLayer) map.removeLayer(cityLayer);
+                if (cityLabelLayer) map.removeLayer(cityLabelLayer);
+            }
+        });
+        
+        cdpsCheckbox.addEventListener('change', function() {
+            showCDPs = this.checked;
+            if (showCDPs) {
+                if (cdpLayer) cdpLayer.addTo(map);
+                if (cdpLabelLayer) cdpLabelLayer.addTo(map);
+            } else {
+                if (cdpLayer) map.removeLayer(cdpLayer);
+                if (cdpLabelLayer) map.removeLayer(cdpLabelLayer);
+            }
+        });
+        
+        return div;
+    };
+    layerVisibilityControl.addTo(map);
+    
+    // Add zoom control last (at bottom) to ensure proper stacking: legend -> checkboxes -> zoom
+    if (!zoomControl) {
+        zoomControl = L.control.zoom({
+            position: 'bottomright'
+        });
+        zoomControl.addTo(map);
+    } else {
+        // Remove and re-add to ensure it's at the bottom
+        if (map.hasControl(zoomControl)) {
+            map.removeControl(zoomControl);
+        }
+        zoomControl.addTo(map);
+    }
 }
 
 // Helper function to check if a feature has demographic data
@@ -852,8 +932,10 @@ function loadLayers() {
     if (filteredCityFeatures.length > 0) {
         console.log('Creating city layer with', filteredCityFeatures.length, 'features');
         cityLayer = createLayer(cityGeoJson, breaks, colors);
-        cityLayer.addTo(map);
-        console.log('City layer added to map');
+        if (showCities) {
+            cityLayer.addTo(map);
+        }
+        console.log('City layer created' + (showCities ? ' and added to map' : ' (hidden)'));
     }
     
     // Create CDP layer
@@ -864,22 +946,30 @@ function loadLayers() {
     if (filteredCdpFeatures.length > 0) {
         console.log('Creating CDP layer with', filteredCdpFeatures.length, 'features');
         cdpLayer = createLayer(cdpGeoJson, breaks, colors);
-        cdpLayer.addTo(map);
-        console.log('CDP layer added to map');
+        if (showCDPs) {
+            cdpLayer.addTo(map);
+        }
+        console.log('CDP layer created' + (showCDPs ? ' and added to map' : ' (hidden)'));
     }
     
     // Create label layers (added after polygon layers for higher z-index)
-    // Labels are created but visibility controlled by zoom level
+    // Labels are created but visibility controlled by zoom level and checkbox state
     if (filteredCityFeatures.length > 0) {
         cityLabelLayer = createLabelLayer(filteredCityFeatures, true);
+        if (showCities) {
+            cityLabelLayer.addTo(map);
+        }
         updateLabelVisibility();
-        console.log('City label layer created');
+        console.log('City label layer created' + (showCities ? ' and added to map' : ' (hidden)'));
     }
     
     if (filteredCdpFeatures.length > 0) {
         cdpLabelLayer = createLabelLayer(filteredCdpFeatures, false);
+        if (showCDPs) {
+            cdpLabelLayer.addTo(map);
+        }
         updateLabelVisibility();
-        console.log('CDP label layer created');
+        console.log('CDP label layer created' + (showCDPs ? ' and added to map' : ' (hidden)'));
     }
     
     // Map bounds are already set to Walnut Creek 50-mile radius view
