@@ -791,22 +791,24 @@ function createLayerVisibilityControl() {
             showCities = this.checked;
             if (showCities) {
                 if (cityLayer) cityLayer.addTo(map);
-                if (cityLabelLayer) cityLabelLayer.addTo(map);
             } else {
                 if (cityLayer) map.removeLayer(cityLayer);
                 if (cityLabelLayer) map.removeLayer(cityLabelLayer);
             }
+            // Update label visibility to respect both zoom level and checkbox state
+            updateLabelVisibility();
         });
         
         cdpsCheckbox.addEventListener('change', function() {
             showCDPs = this.checked;
             if (showCDPs) {
                 if (cdpLayer) cdpLayer.addTo(map);
-                if (cdpLabelLayer) cdpLabelLayer.addTo(map);
             } else {
                 if (cdpLayer) map.removeLayer(cdpLayer);
                 if (cdpLabelLayer) map.removeLayer(cdpLabelLayer);
             }
+            // Update label visibility to respect both zoom level and checkbox state
+            updateLabelVisibility();
         });
         
         return div;
@@ -985,17 +987,19 @@ function updateLabelVisibility() {
     const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
     
     if (cityLabelLayer) {
-        if (shouldShowLabels && !map.hasLayer(cityLabelLayer)) {
+        // Only show city labels if zoom is sufficient AND checkbox is checked
+        if (shouldShowLabels && showCities && !map.hasLayer(cityLabelLayer)) {
             cityLabelLayer.addTo(map);
-        } else if (!shouldShowLabels && map.hasLayer(cityLabelLayer)) {
+        } else if ((!shouldShowLabels || !showCities) && map.hasLayer(cityLabelLayer)) {
             map.removeLayer(cityLabelLayer);
         }
     }
     
     if (cdpLabelLayer) {
-        if (shouldShowLabels && !map.hasLayer(cdpLabelLayer)) {
+        // Only show CDP labels if zoom is sufficient AND checkbox is checked
+        if (shouldShowLabels && showCDPs && !map.hasLayer(cdpLabelLayer)) {
             cdpLabelLayer.addTo(map);
-        } else if (!shouldShowLabels && map.hasLayer(cdpLabelLayer)) {
+        } else if ((!shouldShowLabels || !showCDPs) && map.hasLayer(cdpLabelLayer)) {
             map.removeLayer(cdpLabelLayer);
         }
     }
