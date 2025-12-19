@@ -209,7 +209,7 @@ def merge_demographics(geojson_data, demographics_dict):
 
 def main():
     # File paths
-    geojson_path = Path('cities_final.json')
+    geojson_path = Path('cities_ccc.geojson')
     csv_path = Path('demographics.csv')
     output_path = Path('cities_final.json')  # Overwrite the same file
     
