@@ -211,6 +211,9 @@ function styleFeature(feature, breaks, colors) {
 function highlightFeature(e) {
     const layer = e.target;
     
+    // Stop event propagation to prevent map click handler from firing
+    L.DomEvent.stopPropagation(e);
+    
     // Reset previous selection
     if (selectedLayer) {
         selectedLayer.setStyle({
@@ -883,14 +886,50 @@ map.on('zoomend', function() {
     updateLabelVisibility();
 });
 
+// Handle map clicks to deselect cities and show county data
+map.on('click', function(e) {
+    // Only deselect if clicking on empty space (not on a feature)
+    // The feature click handler will prevent this from firing when clicking on a city/CDP
+    if (selectedLayer) {
+        selectedLayer.setStyle({
+            fillOpacity: 0.7,
+            color: '#555',
+            weight: 2
+        });
+        selectedLayer = null;
+    }
+    
+    // Show county data when no city is selected
+    if (countyData) {
+        populateCountyPanel();
+    }
+    
+    // Reset pie chart if needed
+    if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
+    }
+});
+
 // Handle metric switching
 document.getElementById('metric-select').addEventListener('change', function(e) {
     currentMetric = e.target.value;
     loadLayers();
     
-    // Clear data panel if a feature was selected
+    // Clear selection and show county data
     if (selectedLayer) {
+        selectedLayer.setStyle({
+            fillOpacity: 0.7,
+            color: '#555',
+            weight: 2
+        });
         selectedLayer = null;
+    }
+    
+    // Show county data when metric changes
+    if (countyData) {
+        populateCountyPanel();
+    } else {
         document.getElementById('data-panel').style.display = 'none';
         // Reset pie chart when panel is hidden
         if (pieChart) {
@@ -903,16 +942,88 @@ document.getElementById('metric-select').addEventListener('change', function(e) 
 // Global variables to store loaded data
 let cityData = null;
 let cdpData = null;
+let countyData = null;
+
+// Populate data panel with Contra Costa County data
+function populateCountyPanel() {
+    if (!countyData) {
+        return;
+    }
+    
+    const panel = document.getElementById('data-panel');
+    const content = document.getElementById('panel-content');
+    
+    // Format numbers
+    function formatNumber(num) {
+        if (num === null || num === undefined || isNaN(num)) return 'N/A';
+        return num.toLocaleString();
+    }
+    
+    function formatPercent(num) {
+        if (num === null || num === undefined || isNaN(num)) return 'N/A';
+        return Math.round(num) + '%';
+    }
+    
+    // Update the panel title
+    const panelTitle = panel.querySelector('h2');
+    if (panelTitle) {
+        panelTitle.textContent = countyData.county;
+    }
+    
+    // Calculate percentages for pie chart
+    const whitePercent = countyData.percent_white || 0;
+    const latinoPercent = countyData.percent_latino || 0;
+    const blackPercent = countyData.percent_black || 0;
+    const asianPercent = countyData.percent_asian || 0;
+    const otherPercent = 100 - (whitePercent + latinoPercent + blackPercent + asianPercent);
+    
+    // Build HTML
+    let html = `
+        <div class="data-item">
+            <div class="data-label">Total Population:</div>
+            <div class="data-value">${formatNumber(countyData.population)}</div>
+        </div>
+        
+        <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
+            <canvas id="pie-chart-inline"></canvas>
+        </div>
+        
+        <div class="data-item">
+            <div class="data-label">Foreign Born Population:</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${countyData.percent_foreign_born || 0}%;">
+                    ${countyData.percent_foreign_born >= 5 ? formatPercent(countyData.percent_foreign_born) : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Destroy existing pie chart before replacing HTML
+    if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
+    }
+    
+    content.innerHTML = html;
+    
+    panel.style.display = 'block';
+    
+    // Update pie chart (use setTimeout to ensure DOM is updated)
+    setTimeout(() => {
+        updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent);
+    }, 10);
+}
 
 // Load JSON data files
 async function loadData() {
     try {
         console.log('Loading JSON data files...');
         
-        // Load both JSON files in parallel
-        const [citiesResponse, cdpResponse] = await Promise.all([
+        // Load all JSON files in parallel
+        const [citiesResponse, cdpResponse, countyResponse] = await Promise.all([
             fetch('cities_final.json'),
-            fetch('cdp_final.json')
+            fetch('cdp_final.json'),
+            fetch('ContraCosta.json')
         ]);
         
         if (!citiesResponse.ok) {
@@ -921,16 +1032,26 @@ async function loadData() {
         if (!cdpResponse.ok) {
             throw new Error(`Failed to load cdp_final.json: ${cdpResponse.status}`);
         }
+        if (!countyResponse.ok) {
+            throw new Error(`Failed to load ContraCosta.json: ${countyResponse.status}`);
+        }
         
         cityData = await citiesResponse.json();
         cdpData = await cdpResponse.json();
+        countyData = await countyResponse.json();
         
         console.log('Data loaded successfully!');
         console.log(`  cities_final.json: ${cityData.type}, ${cityData.features?.length || 0} features`);
         console.log(`  cdp_final.json: ${cdpData.type}, ${cdpData.features?.length || 0} features`);
+        console.log(`  ContraCosta.json: ${countyData.county}`);
         
         // Initialize map with loaded data
         loadLayers();
+        
+        // Show county data by default
+        if (countyData) {
+            populateCountyPanel();
+        }
         
     } catch (error) {
         console.error('Error loading data:', error);
