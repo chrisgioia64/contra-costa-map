@@ -19,9 +19,9 @@ setTimeout(() => {
     map.setZoom(12);
 }, 500);
 
-// Add zoom controls at bottom-left to avoid conflicts with legend (bottom-right) and details pane (right)
+// Add zoom controls at bottom-right
 L.control.zoom({
-    position: 'bottomleft'
+    position: 'bottomright'
 }).addTo(map);
 
 // Add base tile layer with 50% opacity
@@ -536,16 +536,28 @@ function calculateCentroid(feature) {
     return [sumLat / count, sumLng / count]; // Return as [lat, lng]
 }
 
+// Get label coordinates from locations.json or calculate centroid
+function getLabelCoordinates(feature, labelText, isCity) {
+    // First, try to get coordinates from locations.json
+    if (locationsData) {
+        const locations = isCity ? locationsData.cities : locationsData.cdps;
+        if (locations && Array.isArray(locations)) {
+            const location = locations.find(loc => loc.name === labelText);
+            if (location && location.latitude !== undefined && location.longitude !== undefined) {
+                return [location.latitude, location.longitude];
+            }
+        }
+    }
+    
+    // Fall back to calculating centroid if not found in locations.json
+    return calculateCentroid(feature);
+}
+
 // Create label layer for features
 function createLabelLayer(features, isCity) {
     const labelGroup = L.layerGroup();
     
     for (let feature of features) {
-        const centroid = calculateCentroid(feature);
-        if (!centroid) {
-            continue;
-        }
-        
         // Get label text: CDTFA_CITY for cities, NAMELSAD for CDPs
         let labelText = isCity 
             ? (feature.properties.CDTFA_CITY || '')
@@ -560,18 +572,26 @@ function createLabelLayer(features, isCity) {
             continue;
         }
         
-        // Create marker with divIcon for styled label
-        // Estimate width: ~8px per character, add padding (12px total)
-        // Height: font-size (12px) + padding (8px total) = ~20px
-        const estimatedWidth = labelText.length * 8 + 12;
-        const estimatedHeight = 20;
+        // Get coordinates from locations.json or calculate centroid
+        const coordinates = getLabelCoordinates(feature, labelText, isCity);
+        if (!coordinates) {
+            continue;
+        }
         
-        const labelMarker = L.marker(centroid, {
+        // Create marker with divIcon for styled label
+        // Cities: larger font (18px), CDPs: smaller font (12px)
+        const fontSize = isCity ? 18 : 12;
+        const charWidth = isCity ? 8 : 7; // Slightly wider per character for cities
+        const horizontalPadding = isCity ? 20 : 10; // Horizontal padding (left + right): 10px each side for cities, 5px each for CDPs
+        const estimatedWidth = labelText.length * charWidth + horizontalPadding;
+        const estimatedHeight = isCity ? 20 : 18;
+        
+        const labelMarker = L.marker(coordinates, {
             icon: L.divIcon({
-                className: 'city-label',
+                className: isCity ? 'city-label' : 'cdp-label',
                 html: labelText,
                 iconSize: [estimatedWidth, estimatedHeight],
-                iconAnchor: [estimatedWidth / 2, estimatedHeight / 2] // Center the label on the centroid
+                iconAnchor: [estimatedWidth / 2, estimatedHeight / 2] // Center the label on the coordinates
             }),
             interactive: false, // Labels don't need to be clickable
             keyboard: false
@@ -952,6 +972,7 @@ document.getElementById('metric-select').addEventListener('change', function(e) 
 // Global variables to store loaded data
 let cityData = null;
 let cdpData = null;
+let locationsData = null; // Store custom label locations
 let countyData = null;
 
 // Populate data panel with Contra Costa County data
@@ -1030,10 +1051,11 @@ async function loadData() {
         console.log('Loading JSON data files...');
         
         // Load all JSON files in parallel
-        const [citiesResponse, cdpResponse, countyResponse] = await Promise.all([
+        const [citiesResponse, cdpResponse, countyResponse, locationsResponse] = await Promise.all([
             fetch('cities_final.json'),
             fetch('cdp_final.json'),
-            fetch('ContraCosta.json')
+            fetch('ContraCosta.json'),
+            fetch('locations.json')
         ]);
         
         if (!citiesResponse.ok) {
@@ -1045,10 +1067,16 @@ async function loadData() {
         if (!countyResponse.ok) {
             throw new Error(`Failed to load ContraCosta.json: ${countyResponse.status}`);
         }
+        if (!locationsResponse.ok) {
+            console.warn(`Failed to load locations.json: ${locationsResponse.status}. Will use calculated centroids.`);
+        }
         
         cityData = await citiesResponse.json();
         cdpData = await cdpResponse.json();
         countyData = await countyResponse.json();
+        if (locationsResponse.ok) {
+            locationsData = await locationsResponse.json();
+        }
         
         console.log('Data loaded successfully!');
         console.log(`  cities_final.json: ${cityData.type}, ${cityData.features?.length || 0} features`);
