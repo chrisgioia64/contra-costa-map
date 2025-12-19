@@ -1,53 +1,73 @@
-// Initialize map centered on Walnut Creek with 20-mile radius view
+// Register Chart.js datalabels plugin if available
+if (typeof ChartDataLabels !== 'undefined') {
+    Chart.register(ChartDataLabels);
+}
+
+// Initialize map centered on Walnut Creek with 20-25 mile radius view
 const walnutCreekCenter = [37.9061, -122.0649];
 const map = L.map('map', {
     center: walnutCreekCenter,
-    zoom: 11,
-    zoomControl: true, // Enable zoom controls (+/- buttons)
+    zoom: 8,
+    zoomControl: false, // Disable default zoom controls (we'll add custom positioned ones)
     scrollWheelZoom: true, // Enable mouse wheel zoom
     doubleClickZoom: true, // Enable double-click zoom
     boxZoom: true, // Enable box zoom (shift+drag)
     keyboard: true // Enable keyboard navigation
-}).setView(walnutCreekCenter, 11); // Set initial center and zoom
+}).setView(walnutCreekCenter, 8); // Set initial center and zoom
 
-// Add base tile layer
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+setTimeout(() => {
+    map.setZoom(12);
+}, 500);
+
+// Add zoom controls at bottom-left to avoid conflicts with legend (bottom-right) and details pane (right)
+L.control.zoom({
+    position: 'bottomleft'
 }).addTo(map);
 
-// Calculate bounds for 20-mile radius around Walnut Creek
-// 20 miles = 32.1868 km
+// Add base tile layer with 50% opacity
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    opacity: 0.5
+}).addTo(map);
+
+// Calculate bounds for 22.5-mile radius around Walnut Creek (middle of 20-25 mile range)
+// 22.5 miles = 36.21 km
 // At latitude 37.9: 1° latitude ≈ 111 km, 1° longitude ≈ 88.6 km
-const radiusMiles = 20;
+const radiusMiles = 22.5;
 const radiusKm = radiusMiles * 1.60934; // Convert miles to km
-const radiusLat = radiusKm / 111; // approximately 0.29 degrees
+const radiusLat = radiusKm / 111; // approximately 0.33 degrees
 const radiusLng = radiusKm / (111 * Math.cos(walnutCreekCenter[0] * Math.PI / 180)); // longitude varies by latitude
 
-// Wait for map to be ready, then fit bounds to 20-mile radius
+// Wait for map to be ready, then fit bounds to 22.5-mile radius
+// Using maxZoom option to ensure we get a closer view (zoomed in)
 map.whenReady(function() {
     const bounds = L.latLngBounds(
         [walnutCreekCenter[0] - radiusLat, walnutCreekCenter[1] - radiusLng], // Southwest corner
         [walnutCreekCenter[0] + radiusLat, walnutCreekCenter[1] + radiusLng]  // Northeast corner
     );
-    map.fitBounds(bounds, { padding: [50, 50] });
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
 });
 
 // Store layer references for re-styling
 let cityLayer = null;
 let cdpLayer = null;
 let selectedLayer = null;
-let currentMetric = 'foreign_born';
-let currentBreaks = [0, 0, 0, 0, 0]; // Store current breaks for legend
+let currentMetric = 'white_percent';
+let currentBreaks = [0, 0, 0, 0, 0, 0, 0]; // Store current breaks for legend (7 steps)
 let legendControl = null; // Legend control reference
+let pieChart = null; // Pie chart instance
+let cityLabelLayer = null; // Leaflet layer group for city labels
+let cdpLabelLayer = null; // Leaflet layer group for CDP labels
+const MIN_ZOOM_FOR_LABELS = 12; // Minimum zoom level to show city labels
 
-// 5-step color scale (darker colors for higher values)
+// 7-step multi-hue sequential color scale (yellow for low, current color for high)
 const colorScale = {
-    foreign_born: ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'],
-    race: ['#e0f3db', '#b8e6b8', '#7bc77e', '#2e7d32', '#1b5e20'],
-    white_percent: ['#deebf7', '#9ecae1', '#6baed6', '#3182bd', '#08519c'],
-    hispanic_percent: ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'],
-    asian_percent: ['#f2e5ff', '#d4b3ff', '#b794f6', '#9f7aea', '#805ad5'],
-    black_percent: ['#e8e8e8', '#bdbdbd', '#969696', '#636363', '#252525']
+    foreign_born: ['#fff9c4', '#fff59d', '#ffeb3b', '#d4e157', '#aed581', '#81c784', '#4caf50'],  // Yellow to green
+    race: ['#fff9c4', '#fff59d', '#ffeb3b', '#c5e1a5', '#a5d6a7', '#66bb6a', '#1b5e20'],  // Yellow to dark green
+    white_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#90caf9', '#64b5f6', '#42a5f5', '#08519c'],  // Yellow to dark blue
+    hispanic_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffcc80', '#ff8a65', '#ff5722', '#a50f15'],  // Yellow to dark red
+    asian_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#e1bee7', '#ce93d8', '#ba68c8', '#805ad5'],  // Yellow to purple
+    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffb74d', '#ff9800', '#e6550d']  // Yellow to orange
 };
 
 // Get value for a feature based on current metric (returns percentage)
@@ -138,19 +158,21 @@ function calculateBreaks(features) {
     
     if (values.length === 0) {
         console.warn('No valid values found for coloring! All features will be gray.');
-        return [0, 0, 0, 0, 0];
+        return [0, 0, 0, 0, 0, 0, 0];
     }
     
     const min = values[0];
     const max = values[values.length - 1];
     
-    // Use quantile breaks (5 steps)
+    // Use quantile breaks (7 steps)
     const breaks = [
         min,
-        values[Math.floor(values.length * 0.2)],
-        values[Math.floor(values.length * 0.4)],
-        values[Math.floor(values.length * 0.6)],
-        values[Math.floor(values.length * 0.8)],
+        values[Math.floor(values.length * (1/7))],
+        values[Math.floor(values.length * (2/7))],
+        values[Math.floor(values.length * (3/7))],
+        values[Math.floor(values.length * (4/7))],
+        values[Math.floor(values.length * (5/7))],
+        values[Math.floor(values.length * (6/7))],
         max
     ];
     
@@ -168,7 +190,9 @@ function getColor(value, breaks, colors) {
     if (value <= breaks[2]) return colors[1];
     if (value <= breaks[3]) return colors[2];
     if (value <= breaks[4]) return colors[3];
-    return colors[4];
+    if (value <= breaks[5]) return colors[4];
+    if (value <= breaks[6]) return colors[5];
+    return colors[6];
 }
 
 // Style function for choropleth
@@ -177,9 +201,9 @@ function styleFeature(feature, breaks, colors) {
     return {
         fillColor: getColor(value, breaks, colors),
         fillOpacity: 0.7,
-        color: '#888',
-        weight: 1,
-        opacity: 0.8
+        color: '#555',
+        weight: 2,
+        opacity: 0.9
     };
 }
 
@@ -191,8 +215,8 @@ function highlightFeature(e) {
     if (selectedLayer) {
         selectedLayer.setStyle({
             fillOpacity: 0.7,
-            color: '#888',
-            weight: 1
+            color: '#555',
+            weight: 2
         });
     }
     
@@ -216,8 +240,8 @@ function resetHighlight(e) {
     
     e.target.setStyle({
         fillOpacity: 0.7,
-        color: '#888',
-        weight: 1
+        color: '#555',
+        weight: 2
     });
 }
 
@@ -267,6 +291,13 @@ function populateDataPanel(feature) {
     const nonWhite = latino + black + asian + other;
     const nonWhitePercent = totalPop > 0 ? (nonWhite / totalPop) * 100 : 0;
     
+    // Calculate race percentages
+    const latinoPercent = totalPop > 0 ? (latino / totalPop) * 100 : 0;
+    const whitePercent = totalPop > 0 ? (white / totalPop) * 100 : 0;
+    const blackPercent = totalPop > 0 ? (black / totalPop) * 100 : 0;
+    const asianPercent = totalPop > 0 ? (asian / totalPop) * 100 : 0;
+    const otherPercent = totalPop > 0 ? (other / totalPop) * 100 : 0;
+    
     // Format numbers
     function formatNumber(num) {
         if (num === null || num === undefined || isNaN(num)) return 'N/A';
@@ -275,58 +306,123 @@ function populateDataPanel(feature) {
     
     function formatPercent(num) {
         if (num === null || num === undefined || isNaN(num)) return 'N/A';
-        return num.toFixed(1) + '%';
+        return Math.round(num) + '%';
+    }
+    
+    // Update the panel title with city name
+    const panelTitle = panel.querySelector('h2');
+    if (panelTitle) {
+        panelTitle.textContent = name;
     }
     
     // Build HTML
     let html = `
         <div class="data-item">
-            <div class="data-label">City/Place Name:</div>
-            <div class="data-value">${name}</div>
-        </div>
-        
-        <div class="data-item">
             <div class="data-label">Total Population:</div>
             <div class="data-value">${formatNumber(totalPop)}</div>
         </div>
         
+        <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
+            <canvas id="pie-chart-inline"></canvas>
+        </div>
+        
         <div class="data-item">
             <div class="data-label">Foreign Born Population:</div>
-            <div class="data-value">${formatNumber(foreignBorn)} (${formatPercent(foreignBornPercent)})</div>
-        </div>
-        
-        <div class="data-item">
-            <div class="data-label">Non-White Population:</div>
-            <div class="data-value">${formatNumber(nonWhite)} (${formatPercent(nonWhitePercent)})</div>
-        </div>
-        
-        <div class="data-item race-data">
-            <div class="data-label">Race Data:</div>
-            <div class="race-item">
-                <span>Latino:</span>
-                <span>${formatNumber(latino)}</span>
-            </div>
-            <div class="race-item">
-                <span>White:</span>
-                <span>${formatNumber(white)}</span>
-            </div>
-            <div class="race-item">
-                <span>Black:</span>
-                <span>${formatNumber(black)}</span>
-            </div>
-            <div class="race-item">
-                <span>Asian:</span>
-                <span>${formatNumber(asian)}</span>
-            </div>
-            <div class="race-item">
-                <span>Other:</span>
-                <span>${formatNumber(other)}</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${foreignBornPercent || 0}%;">
+                    ${foreignBornPercent != null && foreignBornPercent >= 5 ? formatPercent(foreignBornPercent) : ''}
+                </div>
             </div>
         </div>
     `;
     
+    // Destroy existing pie chart before replacing HTML
+    if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
+    }
+    
     content.innerHTML = html;
+    
     panel.style.display = 'block';
+    
+    // Update pie chart (use setTimeout to ensure DOM is updated)
+    setTimeout(() => {
+        updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent);
+    }, 10);
+}
+
+// Update or create pie chart with race demographics
+function updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent) {
+    const ctx = document.getElementById('pie-chart-inline');
+    if (!ctx) return;
+    
+    // Use colors from map color scales (darkest shade from each scale)
+    const data = [
+        { label: 'White', value: Math.round(whitePercent), color: '#08519c' },      // Darkest blue from white_percent scale
+        { label: 'Latino', value: Math.round(latinoPercent), color: '#a50f15' },      // Darkest red from hispanic_percent scale
+        { label: 'Black', value: Math.round(blackPercent), color: '#e6550d' },       // Darkest orange from black_percent scale
+        { label: 'Asian', value: Math.round(asianPercent), color: '#805ad5' },       // Darkest purple from asian_percent scale
+        { label: 'Other', value: Math.round(otherPercent), color: '#969696' }        // Medium gray (neutral)
+    ];
+    
+    // Filter out zero values
+    const filteredData = data.filter(item => item.value > 0);
+    
+    if (pieChart) {
+        // Update existing chart
+        pieChart.data.labels = filteredData.map(item => item.label);
+        pieChart.data.datasets[0].data = filteredData.map(item => item.value);
+        pieChart.data.datasets[0].backgroundColor = filteredData.map(item => item.color);
+        // Ensure datalabels plugin is configured
+        if (pieChart.options.plugins.datalabels) {
+            pieChart.options.plugins.datalabels.display = true;
+        }
+        pieChart.update();
+    } else {
+        // Create new chart
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: filteredData.map(item => item.label),
+                datasets: [{
+                    data: filteredData.map(item => item.value),
+                    backgroundColor: filteredData.map(item => item.color),
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false  // Hide legend since labels are on slices
+                    },
+                    tooltip: {
+                        enabled: false  // Disable tooltips on hover
+                    },
+                    datalabels: {
+                        display: true,  // Always show labels
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        },
+                        formatter: function(value, context) {
+                            const label = context.chart.data.labels[context.dataIndex];
+                            // Always show both label and percentage
+                            return label + '\n' + value + '%';
+                        },
+                        textAlign: 'center',
+                        anchor: 'center',
+                        padding: 6,
+                        clip: false  // Don't clip labels that extend beyond slice
+                    }
+                }
+            }
+        });
+    }
 }
 
 // Filter features to Contra Costa County (approximate bounding box)
@@ -360,6 +456,118 @@ function isInContraCostaCounty(feature) {
         }
     }
     return false;
+}
+
+// Calculate centroid of a polygon feature
+function calculateCentroid(feature) {
+    if (!feature || !feature.geometry || !feature.geometry.coordinates) {
+        return null;
+    }
+    
+    const geometry = feature.geometry;
+    let allCoords = [];
+    
+    if (geometry.type === 'Polygon') {
+        // Use the first ring (exterior ring) of the polygon
+        allCoords = geometry.coordinates[0];
+    } else if (geometry.type === 'MultiPolygon') {
+        // Find the largest polygon in the MultiPolygon
+        let largestPolygon = null;
+        let maxArea = 0;
+        
+        for (let polygon of geometry.coordinates) {
+            const ring = polygon[0];
+            // Simple area approximation (not exact, but good enough for finding largest)
+            let area = 0;
+            for (let i = 0; i < ring.length - 1; i++) {
+                area += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1];
+            }
+            area = Math.abs(area);
+            
+            if (area > maxArea) {
+                maxArea = area;
+                largestPolygon = ring;
+            }
+        }
+        
+        if (largestPolygon) {
+            allCoords = largestPolygon;
+        } else {
+            // Fallback: use first polygon's first ring
+            allCoords = geometry.coordinates[0][0];
+        }
+    } else {
+        return null;
+    }
+    
+    if (allCoords.length === 0) {
+        return null;
+    }
+    
+    // Calculate arithmetic mean of coordinates
+    let sumLat = 0;
+    let sumLng = 0;
+    let count = 0;
+    
+    // Skip last coordinate if it's duplicate of first (closed ring)
+    const coordsToUse = allCoords.length > 0 && 
+                       allCoords[0][0] === allCoords[allCoords.length - 1][0] &&
+                       allCoords[0][1] === allCoords[allCoords.length - 1][1]
+                       ? allCoords.slice(0, -1) : allCoords;
+    
+    for (let coord of coordsToUse) {
+        sumLng += coord[0]; // longitude
+        sumLat += coord[1]; // latitude
+        count++;
+    }
+    
+    if (count === 0) {
+        return null;
+    }
+    
+    return [sumLat / count, sumLng / count]; // Return as [lat, lng]
+}
+
+// Create label layer for features
+function createLabelLayer(features, isCity) {
+    const labelGroup = L.layerGroup();
+    
+    for (let feature of features) {
+        const centroid = calculateCentroid(feature);
+        if (!centroid) {
+            continue;
+        }
+        
+        // Get label text: CDTFA_CITY for cities, NAMELSAD for CDPs
+        const labelText = isCity 
+            ? (feature.properties.CDTFA_CITY || '')
+            : (feature.properties.NAMELSAD || '');
+        
+        if (!labelText) {
+            continue;
+        }
+        
+        // Create marker with divIcon for styled label
+        // Estimate width: ~8px per character, add padding (12px total)
+        // Height: font-size (12px) + padding (8px total) = ~20px
+        const estimatedWidth = labelText.length * 8 + 12;
+        const estimatedHeight = 20;
+        
+        const labelMarker = L.marker(centroid, {
+            icon: L.divIcon({
+                className: 'city-label',
+                html: labelText,
+                iconSize: [estimatedWidth, estimatedHeight],
+                iconAnchor: [estimatedWidth / 2, estimatedHeight / 2] // Center the label on the centroid
+            }),
+            interactive: false, // Labels don't need to be clickable
+            keyboard: false
+        });
+        
+        labelGroup.addLayer(labelMarker);
+    }
+    
+    return labelGroup;
 }
 
 // Collect all features from both datasets, filtered to Contra Costa County
@@ -401,7 +609,7 @@ function createLayer(geoJsonData, breaks, colors) {
                     if (e.target !== selectedLayer) {
                         e.target.setStyle({
                             fillOpacity: 0.85,
-                            weight: 2
+                            weight: 3
                         });
                     }
                 },
@@ -463,7 +671,7 @@ function updateLegend(breaks, colors) {
     // Format percentage for legend
     function formatPercentForLegend(num) {
         if (num === null || num === undefined || isNaN(num)) return 'N/A';
-        return num.toFixed(1) + '%';
+        return Math.round(num) + '%';
     }
     
     // Create legend items for each color step (breaks has 6 values: min, 20th, 40th, 60th, 80th, max)
@@ -507,6 +715,29 @@ function updateLegend(breaks, colors) {
     legendControl.addTo(map);
 }
 
+// Helper function to check if a feature has demographic data
+function hasDemographicData(feature) {
+    if (!feature || !feature.properties) {
+        return false;
+    }
+    
+    const props = feature.properties;
+    // Check if Population exists and is a valid number
+    const population = props.Population;
+    
+    if (population === null || population === undefined) {
+        return false;
+    }
+    
+    // Convert to number if it's a string
+    const popNum = typeof population === 'string' 
+        ? parseFloat(population.replace(/,/g, '')) 
+        : parseFloat(population);
+    
+    // Return true if population is a valid positive number
+    return !isNaN(popNum) && popNum > 0;
+}
+
 // Load and render GeoJSON layers
 function loadLayers() {
     console.log('loadLayers called');
@@ -520,34 +751,31 @@ function loadLayers() {
     if (cdpLayer) {
         map.removeLayer(cdpLayer);
     }
+    if (cityLabelLayer) {
+        map.removeLayer(cityLabelLayer);
+    }
+    if (cdpLabelLayer) {
+        map.removeLayer(cdpLabelLayer);
+    }
     selectedLayer = null;
     
-    // Filter to Contra Costa County
-    // TEMPORARILY: Show all features to debug, then we'll filter
+    // Filter to only include features with demographic data
     let filteredCityFeatures = [];
     if (cityData && cityData.type === 'Feature') {
-        // Temporarily show all to debug
-        filteredCityFeatures.push(cityData);
-        // if (isInContraCostaCounty(cityData)) {
-        //     filteredCityFeatures.push(cityData);
-        // }
+        if (hasDemographicData(cityData)) {
+            filteredCityFeatures.push(cityData);
+        }
     } else if (cityData && cityData.type === 'FeatureCollection') {
-        // Temporarily show all to debug
-        filteredCityFeatures = cityData.features;
-        // filteredCityFeatures = cityData.features.filter(isInContraCostaCounty);
+        filteredCityFeatures = cityData.features.filter(hasDemographicData);
     }
     
     let filteredCdpFeatures = [];
     if (cdpData && cdpData.type === 'Feature') {
-        // Temporarily show all to debug
-        filteredCdpFeatures.push(cdpData);
-        // if (isInContraCostaCounty(cdpData)) {
-        //     filteredCdpFeatures.push(cdpData);
-        // }
+        if (hasDemographicData(cdpData)) {
+            filteredCdpFeatures.push(cdpData);
+        }
     } else if (cdpData && cdpData.type === 'FeatureCollection') {
-        // Temporarily show all to debug
-        filteredCdpFeatures = cdpData.features;
-        // filteredCdpFeatures = cdpData.features.filter(isInContraCostaCounty);
+        filteredCdpFeatures = cdpData.features.filter(hasDemographicData);
     }
     
     // Get all filtered features and calculate breaks once for consistent coloring
@@ -607,12 +835,53 @@ function loadLayers() {
         console.log('CDP layer added to map');
     }
     
+    // Create label layers (added after polygon layers for higher z-index)
+    // Labels are created but visibility controlled by zoom level
+    if (filteredCityFeatures.length > 0) {
+        cityLabelLayer = createLabelLayer(filteredCityFeatures, true);
+        updateLabelVisibility();
+        console.log('City label layer created');
+    }
+    
+    if (filteredCdpFeatures.length > 0) {
+        cdpLabelLayer = createLabelLayer(filteredCdpFeatures, false);
+        updateLabelVisibility();
+        console.log('CDP label layer created');
+    }
+    
     // Map bounds are already set to Walnut Creek 50-mile radius view
     // No need to override with feature bounds
     if (!cityLayer && !cdpLayer) {
         console.error('No layers created!');
     }
 }
+
+// Update label visibility based on zoom level
+function updateLabelVisibility() {
+    const currentZoom = map.getZoom();
+    const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
+    
+    if (cityLabelLayer) {
+        if (shouldShowLabels && !map.hasLayer(cityLabelLayer)) {
+            cityLabelLayer.addTo(map);
+        } else if (!shouldShowLabels && map.hasLayer(cityLabelLayer)) {
+            map.removeLayer(cityLabelLayer);
+        }
+    }
+    
+    if (cdpLabelLayer) {
+        if (shouldShowLabels && !map.hasLayer(cdpLabelLayer)) {
+            cdpLabelLayer.addTo(map);
+        } else if (!shouldShowLabels && map.hasLayer(cdpLabelLayer)) {
+            map.removeLayer(cdpLabelLayer);
+        }
+    }
+}
+
+// Listen to zoom events to show/hide labels
+map.on('zoomend', function() {
+    updateLabelVisibility();
+});
 
 // Handle metric switching
 document.getElementById('metric-select').addEventListener('change', function(e) {
@@ -623,6 +892,11 @@ document.getElementById('metric-select').addEventListener('change', function(e) 
     if (selectedLayer) {
         selectedLayer = null;
         document.getElementById('data-panel').style.display = 'none';
+        // Reset pie chart when panel is hidden
+        if (pieChart) {
+            pieChart.destroy();
+            pieChart = null;
+        }
     }
 });
 
