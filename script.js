@@ -112,11 +112,24 @@ function getFeatureValue(feature) {
         }
         return 0;
     } else if (currentMetric === 'hispanic_percent') {
-        // Calculate Hispanic/Latino percentage: (Latino / total population) * 100
+        // Calculate Hispanic/Latino percentage
+        // First, try to use the 'Latino Percent' property directly if it exists
+        if (props['Latino Percent'] !== null && props['Latino Percent'] !== undefined) {
+            let latinoPercent = props['Latino Percent'];
+            if (typeof latinoPercent === 'string') {
+                latinoPercent = parseFloat(String(latinoPercent).replace(/%/g, '').replace(/,/g, '').trim());
+            }
+            if (!isNaN(latinoPercent) && latinoPercent >= 0) {
+                return latinoPercent;
+            }
+        }
+        
+        // Otherwise, calculate from population count
         const latino = parseFloat(String(props.Latino || 0).replace(/,/g, '')) || 0;
         
         if (totalPop > 0) {
-            return (latino / totalPop) * 100;
+            const percent = (latino / totalPop) * 100;
+            return percent;
         }
         return 0;
     } else if (currentMetric === 'asian_percent') {
@@ -143,7 +156,7 @@ function getFeatureValue(feature) {
 function calculateBreaks(features) {
     const values = features
         .map(f => getFeatureValue(f))
-        .filter(v => v !== null && v !== undefined && !isNaN(v) && v > 0)
+        .filter(v => v !== null && v !== undefined && !isNaN(v) && v >= 0)
         .sort((a, b) => a - b);
     
     // Debug: log first few feature properties
@@ -154,7 +167,7 @@ function calculateBreaks(features) {
         console.log(`Sample percentage value: ${sampleValue.toFixed(1)}%`);
     }
     
-    console.log(`Found ${values.length} non-zero percentage values out of ${features.length} features`);
+    console.log(`Found ${values.length} valid percentage values (including zeros) out of ${features.length} features`);
     if (values.length > 0) {
         console.log(`Percentage range: ${values[0].toFixed(1)}% to ${values[values.length - 1].toFixed(1)}%`);
     }
@@ -168,27 +181,46 @@ function calculateBreaks(features) {
     const max = values[values.length - 1];
     
     // Use quantile breaks (7 steps)
-    const breaks = [
-        min,
-        values[Math.floor(values.length * (1/7))],
-        values[Math.floor(values.length * (2/7))],
-        values[Math.floor(values.length * (3/7))],
-        values[Math.floor(values.length * (4/7))],
-        values[Math.floor(values.length * (5/7))],
-        values[Math.floor(values.length * (6/7))],
-        max
-    ];
+    // Ensure we have at least 2 values for proper breaks
+    let breaks;
+    if (values.length === 1) {
+        // If only one value, create breaks around it
+        breaks = [min, min, min, min, min, min, min, max];
+    } else {
+        breaks = [
+            min,
+            values[Math.max(0, Math.floor(values.length * (1/7)))],
+            values[Math.max(0, Math.floor(values.length * (2/7)))],
+            values[Math.max(0, Math.floor(values.length * (3/7)))],
+            values[Math.max(0, Math.floor(values.length * (4/7)))],
+            values[Math.max(0, Math.floor(values.length * (5/7)))],
+            values[Math.max(0, Math.floor(values.length * (6/7)))],
+            max
+        ];
+    }
     
-    console.log('Color breaks:', breaks);
+    console.log(`Color breaks for ${currentMetric}:`, breaks);
+    console.log(`Value range: ${min.toFixed(2)}% to ${max.toFixed(2)}%`);
     return breaks;
 }
 
 // Get color for a value based on breaks
 function getColor(value, breaks, colors) {
-    if (value === null || value === undefined || isNaN(value) || value === 0) {
-        return '#f0f0f0'; // Light gray for null/zero values
+    // Only return gray for null/undefined/NaN values, not for 0 (which is a valid percentage)
+    if (value === null || value === undefined || isNaN(value)) {
+        return '#f0f0f0'; // Light gray for null/undefined/NaN values
     }
     
+    // Handle edge case where all breaks might be the same (e.g., all values are 0)
+    if (breaks[0] === breaks[breaks.length - 1]) {
+        // If all values are the same, check if it's 0 (should get lowest color) or non-zero
+        if (value === 0 || value === breaks[0]) {
+            return colors[0]; // Return first (yellow) color for 0 or matching value
+        }
+        return colors[colors.length - 1]; // Return last color for values above the break
+    }
+    
+    // Normal color assignment based on breaks
     if (value <= breaks[1]) return colors[0];
     if (value <= breaks[2]) return colors[1];
     if (value <= breaks[3]) return colors[2];
@@ -825,7 +857,8 @@ function createLayerVisibilityControl() {
         zoomControl.addTo(map);
     } else {
         // Remove and re-add to ensure it's at the bottom
-        if (map.hasControl(zoomControl)) {
+        // Check if control is already on map by checking if it has a _map property
+        if (zoomControl._map) {
             map.removeControl(zoomControl);
         }
         zoomControl.addTo(map);
