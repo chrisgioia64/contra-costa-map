@@ -993,20 +993,16 @@ function loadLayers() {
     // Labels are created but visibility controlled by zoom level and checkbox state
     if (filteredCityFeatures.length > 0) {
         cityLabelLayer = createLabelLayer(filteredCityFeatures, true);
-        if (showCities) {
-            cityLabelLayer.addTo(map);
-        }
+        // Don't add to map immediately - let updateLabelVisibility() handle it based on zoom and checkbox
         updateLabelVisibility();
-        console.log('City label layer created' + (showCities ? ' and added to map' : ' (hidden)'));
+        console.log('City label layer created');
     }
     
     if (filteredCdpFeatures.length > 0) {
         cdpLabelLayer = createLabelLayer(filteredCdpFeatures, false);
-        if (showCDPs) {
-            cdpLabelLayer.addTo(map);
-        }
+        // Don't add to map immediately - let updateLabelVisibility() handle it based on zoom and checkbox
         updateLabelVisibility();
-        console.log('CDP label layer created' + (showCDPs ? ' and added to map' : ' (hidden)'));
+        console.log('CDP label layer created');
     }
     
     // Map bounds are already set to Walnut Creek 50-mile radius view
