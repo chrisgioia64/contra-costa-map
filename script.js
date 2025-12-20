@@ -358,6 +358,36 @@ function populateDataPanel(feature) {
     const panelTitle = panel.querySelector('h2');
     if (panelTitle) {
         panelTitle.textContent = name;
+        
+        // Add close button for mobile if it doesn't exist
+        if (window.innerWidth <= 768) {
+            let closeButton = panel.querySelector('.close-button-mobile');
+            if (!closeButton) {
+                closeButton = document.createElement('button');
+                closeButton.className = 'close-button-mobile';
+                closeButton.innerHTML = '×';
+                closeButton.setAttribute('aria-label', 'Close panel');
+                closeButton.onclick = function() {
+                    hideDataPanel();
+                    // Deselect layer
+                    if (selectedLayer) {
+                        selectedLayer.setStyle({
+                            fillOpacity: 0.7,
+                            color: '#555',
+                            weight: 2
+                        });
+                        selectedLayer = null;
+                    }
+                    // Reset pie chart
+                    if (pieChart) {
+                        pieChart.destroy();
+                        pieChart = null;
+                    }
+                };
+                panelTitle.style.position = 'relative';
+                panelTitle.appendChild(closeButton);
+            }
+        }
     }
     
     // Build HTML
@@ -389,7 +419,7 @@ function populateDataPanel(feature) {
     
     content.innerHTML = html;
     
-    panel.style.display = 'block';
+    showDataPanel();
     
     // Update pie chart (use setTimeout to ensure DOM is updated)
     setTimeout(() => {
@@ -776,10 +806,29 @@ function updateLegend(breaks, colors) {
     </div>`;
     
     // Create and add legend control
-    legendControl = L.control({ position: 'bottomright' });
+    const legendPosition = window.innerWidth <= 768 ? 'bottomleft' : 'bottomright';
+    legendControl = L.control({ position: legendPosition });
     legendControl.onAdd = function() {
         const div = L.DomUtil.create('div', 'legend-control');
-        div.innerHTML = legendHTML;
+        
+        // Add toggle button for mobile
+        if (window.innerWidth <= 768) {
+            const toggleButton = L.DomUtil.create('button', 'legend-toggle');
+            toggleButton.textContent = 'Legend ▼';
+            toggleButton.style.cssText = 'display: block; width: 100%; padding: 10px; background: #f5f5f5; border: none; text-align: center; font-weight: bold; cursor: pointer; border-bottom: 1px solid #ddd;';
+            toggleButton.onclick = function() {
+                div.classList.toggle('collapsed');
+                toggleButton.textContent = div.classList.contains('collapsed') ? 'Legend ▶' : 'Legend ▼';
+            };
+            div.appendChild(toggleButton);
+            
+            const contentDiv = L.DomUtil.create('div', 'legend-content');
+            contentDiv.innerHTML = legendHTML;
+            div.appendChild(contentDiv);
+        } else {
+            div.innerHTML = legendHTML;
+        }
+        
         return div;
     };
     legendControl.addTo(map);
@@ -1056,9 +1105,16 @@ map.on('click', function(e) {
         selectedLayer = null;
     }
     
-    // Show county data when no city is selected
-    if (countyData) {
-        populateCountyPanel();
+    // Show county data when no city is selected (desktop only)
+    if (window.innerWidth > 768) {
+        if (countyData) {
+            populateCountyPanel();
+        } else {
+            document.getElementById('data-panel').style.display = 'none';
+        }
+    } else {
+        // On mobile, hide panel when clicking empty space
+        hideDataPanel();
     }
     
     // Reset pie chart if needed
@@ -1083,12 +1139,21 @@ document.getElementById('metric-select').addEventListener('change', function(e) 
         selectedLayer = null;
     }
     
-    // Show county data when metric changes
-    if (countyData) {
-        populateCountyPanel();
+    // Show county data when metric changes (desktop only)
+    if (window.innerWidth > 768) {
+        if (countyData) {
+            populateCountyPanel();
+        } else {
+            hideDataPanel();
+            // Reset pie chart when panel is hidden
+            if (pieChart) {
+                pieChart.destroy();
+                pieChart = null;
+            }
+        }
     } else {
-        document.getElementById('data-panel').style.display = 'none';
-        // Reset pie chart when panel is hidden
+        // On mobile, hide panel when metric changes
+        hideDataPanel();
         if (pieChart) {
             pieChart.destroy();
             pieChart = null;
@@ -1164,7 +1229,7 @@ function populateCountyPanel() {
     
     content.innerHTML = html;
     
-    panel.style.display = 'block';
+    showDataPanel();
     
     // Update pie chart (use setTimeout to ensure DOM is updated)
     setTimeout(() => {
@@ -1213,8 +1278,11 @@ async function loadData() {
         // Initialize map with loaded data
         loadLayers();
         
-        // Show county data by default
-        if (countyData) {
+        // Initialize swipe gesture for mobile
+        initSwipeGesture();
+        
+        // Show county data by default (desktop only)
+        if (countyData && window.innerWidth > 768) {
             populateCountyPanel();
         }
         
@@ -1222,6 +1290,70 @@ async function loadData() {
         console.error('Error loading data:', error);
         alert('Failed to load map data. Please check the console for details.');
     }
+}
+
+// Helper functions for mobile-responsive panel
+function showDataPanel() {
+    const panel = document.getElementById('data-panel');
+    if (!panel) {
+        console.error('Data panel not found!');
+        return;
+    }
+    
+    if (window.innerWidth <= 768) {
+        // Mobile: ensure panel is visible and add show class
+        panel.style.display = 'block';
+        panel.classList.add('show');
+        console.log('Showing panel on mobile, added show class');
+    } else {
+        // Desktop: use display block
+        panel.style.display = 'block';
+        panel.classList.remove('show');
+    }
+}
+
+function hideDataPanel() {
+    const panel = document.getElementById('data-panel');
+    if (!panel) return;
+    if (window.innerWidth <= 768) {
+        panel.classList.remove('show');
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+// Add swipe down gesture support for bottom sheet (initialize after DOM is ready)
+function initSwipeGesture() {
+    const dataPanel = document.getElementById('data-panel');
+    if (!dataPanel) return;
+    
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    dataPanel.addEventListener('touchstart', function(e) {
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+    
+    dataPanel.addEventListener('touchend', function(e) {
+        touchEndY = e.changedTouches[0].screenY;
+        const swipeDistance = touchStartY - touchEndY;
+        
+        // If swiping down more than 50px, close the panel
+        if (swipeDistance < -50 && window.innerWidth <= 768) {
+            hideDataPanel();
+            // Also deselect any selected layer
+            if (selectedLayer) {
+                selectedLayer.setStyle({
+                    fillOpacity: 0.7,
+                    color: '#555',
+                    weight: 2
+                });
+                selectedLayer = null;
+            }
+            // Don't show county data on mobile when swiping down
+            // Panel is just hidden
+        }
+    }, { passive: true });
 }
 
 // Initialize when DOM is ready
