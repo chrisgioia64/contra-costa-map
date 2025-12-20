@@ -5,9 +5,12 @@ if (typeof ChartDataLabels !== 'undefined') {
 
 // Initialize map centered on Walnut Creek with 20-25 mile radius view
 const walnutCreekCenter = [37.9061, -122.0649];
+// Determine initial zoom based on screen size (mobile: 10, desktop: 12)
+const initialZoom = window.innerWidth <= 768 ? 10 : 12;
+
 const map = L.map('map', {
     center: walnutCreekCenter,
-    zoom: 12, // Initial zoom (will be overridden by fitBounds)
+    zoom: initialZoom, // Initial zoom (will be overridden by fitBounds)
     zoomControl: false, // Disable default zoom controls (we'll add custom positioned ones)
     scrollWheelZoom: true, // Enable mouse wheel zoom
     doubleClickZoom: true, // Enable double-click zoom
@@ -20,7 +23,7 @@ const map = L.map('map', {
 let zoomControl = null;
 
 setTimeout(() => {
-    map.setZoom(12);
+    map.setZoom(initialZoom);
 }, 10);
 
 // Add base tile layer with 50% opacity
@@ -45,7 +48,8 @@ map.whenReady(function() {
         [walnutCreekCenter[0] - radiusLat, walnutCreekCenter[1] - radiusLng], // Southwest corner
         [walnutCreekCenter[0] + radiusLat, walnutCreekCenter[1] + radiusLng]  // Northeast corner
     );
-    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12, animate: false });
+    const maxZoom = window.innerWidth <= 768 ? 10 : 12;
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: maxZoom, animate: false });
 });
 
 // Store layer references for re-styling
@@ -814,7 +818,7 @@ function updateLegend(breaks, colors) {
         // Add toggle button for mobile
         if (window.innerWidth <= 768) {
             const toggleButton = L.DomUtil.create('button', 'legend-toggle');
-            toggleButton.textContent = 'Legend ▼';
+            toggleButton.textContent = 'Legend ▶'; // Start collapsed
             toggleButton.style.cssText = 'display: block; width: 100%; padding: 10px; background: #f5f5f5; border: none; text-align: center; font-weight: bold; cursor: pointer; border-bottom: 1px solid #ddd;';
             toggleButton.onclick = function() {
                 div.classList.toggle('collapsed');
@@ -825,6 +829,9 @@ function updateLegend(breaks, colors) {
             const contentDiv = L.DomUtil.create('div', 'legend-content');
             contentDiv.innerHTML = legendHTML;
             div.appendChild(contentDiv);
+            
+            // Start collapsed by default on mobile
+            div.classList.add('collapsed');
         } else {
             div.innerHTML = legendHTML;
         }
