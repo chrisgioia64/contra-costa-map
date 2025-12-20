@@ -7,20 +7,21 @@ if (typeof ChartDataLabels !== 'undefined') {
 const walnutCreekCenter = [37.9061, -122.0649];
 const map = L.map('map', {
     center: walnutCreekCenter,
-    zoom: 8,
+    zoom: 12, // Initial zoom (will be overridden by fitBounds)
     zoomControl: false, // Disable default zoom controls (we'll add custom positioned ones)
     scrollWheelZoom: true, // Enable mouse wheel zoom
     doubleClickZoom: true, // Enable double-click zoom
     boxZoom: true, // Enable box zoom (shift+drag)
     keyboard: true // Enable keyboard navigation
-}).setView(walnutCreekCenter, 8); // Set initial center and zoom
+});
 
-setTimeout(() => {
-    map.setZoom(12);
-}, 500);
 
 // Zoom control will be added after layer visibility control to ensure proper stacking order
 let zoomControl = null;
+
+setTimeout(() => {
+    map.setZoom(12);
+}, 10);
 
 // Add base tile layer with 50% opacity
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -38,12 +39,13 @@ const radiusLng = radiusKm / (111 * Math.cos(walnutCreekCenter[0] * Math.PI / 18
 
 // Wait for map to be ready, then fit bounds to 22.5-mile radius
 // Using maxZoom option to ensure we get a closer view (zoomed in)
+// Set animate: false to prevent double zoom animation on startup
 map.whenReady(function() {
     const bounds = L.latLngBounds(
         [walnutCreekCenter[0] - radiusLat, walnutCreekCenter[1] - radiusLng], // Southwest corner
         [walnutCreekCenter[0] + radiusLat, walnutCreekCenter[1] + radiusLng]  // Northeast corner
     );
-    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12, animate: false });
 });
 
 // Store layer references for re-styling
