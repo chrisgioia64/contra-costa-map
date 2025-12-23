@@ -500,18 +500,28 @@ function updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent,
                         display: false  // Hide legend since labels are on slices
                     },
                     tooltip: {
-                        enabled: false  // Disable tooltips on hover
+                        enabled: true,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                return label + ': ' + value + '%';
+                            }
+                        }
                     },
                     datalabels: {
                         display: true,  // Always show labels
-                        color: '#fff',
+                        color: '#fff',  // White text for labels inside chart
                         font: {
                             weight: 'bold',
                             size: 12
                         },
                         formatter: function(value, context) {
                             const label = context.chart.data.labels[context.dataIndex];
-                            // Always show both label and percentage
+                            // Show percentage only if value is 10% or greater
+                            if (value < 10) {
+                                return label;
+                            }
                             return label + '\n' + value + '%';
                         },
                         textAlign: 'center',
