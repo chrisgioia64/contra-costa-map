@@ -57,7 +57,7 @@ let cityLayer = null;
 let cdpLayer = null;
 let selectedLayer = null;
 let currentMetric = 'white_percent';
-let currentBreaks = [0, 0, 0, 0, 0, 0, 0, 0]; // Store current breaks for legend (8 steps)
+let currentBreaks = [0, 0, 0, 0, 0, 0, 0, 0]; // Store current breaks for legend (dynamically sized)
 let legendControl = null; // Legend control reference
 let pieChart = null; // Pie chart instance
 let cityLabelLayer = null; // Leaflet layer group for city labels
@@ -67,11 +67,11 @@ let showCDPs = true; // Default: show CDPs
 let cdpLabelLayer = null; // Leaflet layer group for CDP labels
 const MIN_ZOOM_FOR_LABELS = 12; // Minimum zoom level to show city labels
 
-// 8-step multi-hue sequential color scale (yellow for low, intermediate color, then target color for high)
+// Multi-hue sequential color scale (yellow for low, intermediate color, then target color for high)
 const colorScale = {
     foreign_born: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#4caf50'],  // Yellow -> light green -> green
     race: ['#fff9c4', '#fff59d', '#ffeb3b', '#c5e1a5', '#a5d6a7', '#81c784', '#66bb6a', '#1b5e20'],  // Yellow -> light green -> dark green
-    white_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#85c1e9', '#5dade2', '#3498db', '#2874a6', '#1b4f72'],  // Yellow -> light blue -> darker blue
+    white_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> green -> blue (7 colors)
     hispanic_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#f8c471', '#ff8a65', '#ff5722', '#e74c3c', '#a50f15'],  // Yellow -> orange -> dark red
     asian_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#d7bde2', '#ce93d8', '#ba68c8', '#9c27b0', '#805ad5'],  // Yellow -> light purple -> purple
     black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#e6550d']  // Yellow -> light orange -> orange
@@ -163,6 +163,10 @@ function calculateBreaks(features) {
         .filter(v => v !== null && v !== undefined && !isNaN(v) && v >= 0)
         .sort((a, b) => a - b);
     
+    // Get number of colors for current metric
+    const colors = colorScale[currentMetric];
+    const numColors = colors ? colors.length : 8;
+    
     // Debug: log first few feature properties
     if (features.length > 0) {
         const sampleFeature = features[0];
@@ -178,30 +182,24 @@ function calculateBreaks(features) {
     
     if (values.length === 0) {
         console.warn('No valid values found for coloring! All features will be gray.');
-        return [0, 0, 0, 0, 0, 0, 0];
+        return new Array(numColors + 1).fill(0);
     }
     
     const min = values[0];
     const max = values[values.length - 1];
     
-    // Use quantile breaks (8 steps for 8 colors)
+    // Use quantile breaks (dynamic based on number of colors)
     // Ensure we have at least 2 values for proper breaks
     let breaks;
     if (values.length === 1) {
         // If only one value, create breaks around it
-        breaks = [min, min, min, min, min, min, min, min, max];
+        breaks = [min, ...new Array(numColors - 1).fill(min), max];
     } else {
-        breaks = [
-            min,
-            values[Math.max(0, Math.floor(values.length * (1/8)))],
-            values[Math.max(0, Math.floor(values.length * (2/8)))],
-            values[Math.max(0, Math.floor(values.length * (3/8)))],
-            values[Math.max(0, Math.floor(values.length * (4/8)))],
-            values[Math.max(0, Math.floor(values.length * (5/8)))],
-            values[Math.max(0, Math.floor(values.length * (6/8)))],
-            values[Math.max(0, Math.floor(values.length * (7/8)))],
-            max
-        ];
+        breaks = [min];
+        for (let i = 1; i < numColors; i++) {
+            breaks.push(values[Math.max(0, Math.floor(values.length * (i / numColors)))]);
+        }
+        breaks.push(max);
     }
     
     console.log(`Color breaks for ${currentMetric}:`, breaks);
@@ -225,15 +223,11 @@ function getColor(value, breaks, colors) {
         return colors[colors.length - 1]; // Return last color for values above the break
     }
     
-    // Normal color assignment based on breaks (8 colors)
-    if (value <= breaks[1]) return colors[0];
-    if (value <= breaks[2]) return colors[1];
-    if (value <= breaks[3]) return colors[2];
-    if (value <= breaks[4]) return colors[3];
-    if (value <= breaks[5]) return colors[4];
-    if (value <= breaks[6]) return colors[5];
-    if (value <= breaks[7]) return colors[6];
-    return colors[7];
+    // Normal color assignment based on breaks (dynamic number of colors)
+    for (let i = 0; i < colors.length - 1; i++) {
+        if (value <= breaks[i + 1]) return colors[i];
+    }
+    return colors[colors.length - 1];
 }
 
 // Style function for choropleth
