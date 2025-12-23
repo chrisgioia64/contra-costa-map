@@ -363,34 +363,61 @@ function populateDataPanel(feature) {
     if (panelTitle) {
         panelTitle.textContent = name;
         
+        // Add close button (desktop or mobile)
+        let closeButton = panel.querySelector('.close-button');
+        let closeButtonMobile = panel.querySelector('.close-button-mobile');
+        
+        // Create desktop close button if it doesn't exist
+        if (!closeButton && window.innerWidth > 768) {
+            closeButton = document.createElement('button');
+            closeButton.className = 'close-button';
+            closeButton.innerHTML = '×';
+            closeButton.setAttribute('aria-label', 'Close panel');
+            closeButton.onclick = function() {
+                hideDataPanel();
+                // Deselect layer
+                if (selectedLayer) {
+                    selectedLayer.setStyle({
+                        fillOpacity: 0.7,
+                        color: '#555',
+                        weight: 2
+                    });
+                    selectedLayer = null;
+                }
+                // Reset pie chart
+                if (pieChart) {
+                    pieChart.destroy();
+                    pieChart = null;
+                }
+            };
+            panelTitle.appendChild(closeButton);
+        }
+        
         // Add close button for mobile if it doesn't exist
-        if (window.innerWidth <= 768) {
-            let closeButton = panel.querySelector('.close-button-mobile');
-            if (!closeButton) {
-                closeButton = document.createElement('button');
-                closeButton.className = 'close-button-mobile';
-                closeButton.innerHTML = '×';
-                closeButton.setAttribute('aria-label', 'Close panel');
-                closeButton.onclick = function() {
-                    hideDataPanel();
-                    // Deselect layer
-                    if (selectedLayer) {
-                        selectedLayer.setStyle({
-                            fillOpacity: 0.7,
-                            color: '#555',
-                            weight: 2
-                        });
-                        selectedLayer = null;
-                    }
-                    // Reset pie chart
-                    if (pieChart) {
-                        pieChart.destroy();
-                        pieChart = null;
-                    }
-                };
-                panelTitle.style.position = 'relative';
-                panelTitle.appendChild(closeButton);
-            }
+        if (!closeButtonMobile && window.innerWidth <= 768) {
+            closeButtonMobile = document.createElement('button');
+            closeButtonMobile.className = 'close-button-mobile';
+            closeButtonMobile.innerHTML = '×';
+            closeButtonMobile.setAttribute('aria-label', 'Close panel');
+            closeButtonMobile.onclick = function() {
+                hideDataPanel();
+                // Deselect layer
+                if (selectedLayer) {
+                    selectedLayer.setStyle({
+                        fillOpacity: 0.7,
+                        color: '#555',
+                        weight: 2
+                    });
+                    selectedLayer = null;
+                }
+                // Reset pie chart
+                if (pieChart) {
+                    pieChart.destroy();
+                    pieChart = null;
+                }
+            };
+            panelTitle.style.position = 'relative';
+            panelTitle.appendChild(closeButtonMobile);
         }
     }
     
@@ -1198,6 +1225,63 @@ function populateCountyPanel() {
     const panelTitle = panel.querySelector('h2');
     if (panelTitle) {
         panelTitle.textContent = countyData.county;
+        
+        // Add close button (desktop or mobile)
+        let closeButton = panel.querySelector('.close-button');
+        let closeButtonMobile = panel.querySelector('.close-button-mobile');
+        
+        // Create desktop close button if it doesn't exist
+        if (!closeButton && window.innerWidth > 768) {
+            closeButton = document.createElement('button');
+            closeButton.className = 'close-button';
+            closeButton.innerHTML = '×';
+            closeButton.setAttribute('aria-label', 'Close panel');
+            closeButton.onclick = function() {
+                hideDataPanel();
+                // Deselect layer
+                if (selectedLayer) {
+                    selectedLayer.setStyle({
+                        fillOpacity: 0.7,
+                        color: '#555',
+                        weight: 2
+                    });
+                    selectedLayer = null;
+                }
+                // Reset pie chart
+                if (pieChart) {
+                    pieChart.destroy();
+                    pieChart = null;
+                }
+            };
+            panelTitle.appendChild(closeButton);
+        }
+        
+        // Add close button for mobile if it doesn't exist
+        if (!closeButtonMobile && window.innerWidth <= 768) {
+            closeButtonMobile = document.createElement('button');
+            closeButtonMobile.className = 'close-button-mobile';
+            closeButtonMobile.innerHTML = '×';
+            closeButtonMobile.setAttribute('aria-label', 'Close panel');
+            closeButtonMobile.onclick = function() {
+                hideDataPanel();
+                // Deselect layer
+                if (selectedLayer) {
+                    selectedLayer.setStyle({
+                        fillOpacity: 0.7,
+                        color: '#555',
+                        weight: 2
+                    });
+                    selectedLayer = null;
+                }
+                // Reset pie chart
+                if (pieChart) {
+                    pieChart.destroy();
+                    pieChart = null;
+                }
+            };
+            panelTitle.style.position = 'relative';
+            panelTitle.appendChild(closeButtonMobile);
+        }
     }
     
     // Calculate percentages for pie chart
