@@ -1339,17 +1339,17 @@ async function loadData() {
         
         // Load all JSON files in parallel
         const [citiesResponse, cdpResponse, countyResponse, locationsResponse] = await Promise.all([
-            fetch('cities_final.json'),
-            fetch('cdp_final.json'),
+            fetch('cities-final.json'),
+            fetch('cdp-final.json'),
             fetch('ContraCosta.json'),
             fetch('locations.json')
         ]);
         
         if (!citiesResponse.ok) {
-            throw new Error(`Failed to load cities_final.json: ${citiesResponse.status}`);
+            throw new Error(`Failed to load cities-final.json: ${citiesResponse.status}`);
         }
         if (!cdpResponse.ok) {
-            throw new Error(`Failed to load cdp_final.json: ${cdpResponse.status}`);
+            throw new Error(`Failed to load cdp-final.json: ${cdpResponse.status}`);
         }
         if (!countyResponse.ok) {
             throw new Error(`Failed to load ContraCosta.json: ${countyResponse.status}`);
@@ -1366,8 +1366,8 @@ async function loadData() {
         }
         
         console.log('Data loaded successfully!');
-        console.log(`  cities_final.json: ${cityData.type}, ${cityData.features?.length || 0} features`);
-        console.log(`  cdp_final.json: ${cdpData.type}, ${cdpData.features?.length || 0} features`);
+        console.log(`  cities-final.json: ${cityData.type}, ${cityData.features?.length || 0} features`);
+        console.log(`  cdp-final.json: ${cdpData.type}, ${cdpData.features?.length || 0} features`);
         console.log(`  ContraCosta.json: ${countyData.county}`);
         
         // Initialize map with loaded data

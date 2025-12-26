@@ -31,4 +31,4 @@ View: Open index.html in a browser.
 - `demographics.csv` : Source of truth for all stats (Update this only)
 - `cities_ccc.geojson` : Static City Boundaries (only update on every Census)
 - `cdp_ccc_84.geojson` : Static CDP boundaries (WGS84 projection which is what the app requires) (update only on every Census)
-- `*_final.json` : Merged artifacts used by `script.js` (Auto-generated)
+- `*-final.json` : Merged artifacts used by `script.js` (Auto-generated: `cities-final.json`, `cdp-final.json`)

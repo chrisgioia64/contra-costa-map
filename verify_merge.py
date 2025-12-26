@@ -1,6 +1,6 @@
 import json
 
-with open('cdp_final.json', 'r', encoding='utf-8') as f:
+with open('cdp-final.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 
 matched = [feat for feat in data['features'] 

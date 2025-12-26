@@ -227,7 +227,7 @@ def main():
     # File paths
     geojson_path = Path('cdp_ccc_84.geojson')
     csv_path = Path('demographics.csv')
-    output_path = Path('cdp_final.json')
+    output_path = Path('cdp-final.json')
     
     # Check if input files exist
     if not geojson_path.exists():

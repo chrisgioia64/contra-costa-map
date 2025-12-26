@@ -211,7 +211,7 @@ def main():
     # File paths
     geojson_path = Path('cities_ccc.geojson')
     csv_path = Path('demographics.csv')
-    output_path = Path('cities_final.json')  # Overwrite the same file
+    output_path = Path('cities-final.json')  # Overwrite the same file
     
     # Check if input files exist
     if not geojson_path.exists():
