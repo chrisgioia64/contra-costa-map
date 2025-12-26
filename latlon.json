@@ -1,0 +1,291 @@
+{
+  "cities": [
+    {
+      "name": "Antioch",
+      "latitude": 37.991357,
+      "longitude": -121.808563
+    },
+    {
+      "name": "Brentwood",
+      "latitude": 37.929294,
+      "longitude": -121.722496
+    },
+    {
+      "name": "Clayton",
+      "latitude": 37.938286,
+      "longitude": -121.926713
+    },
+    {
+      "name": "Concord",
+      "latitude": 37.962553,
+      "longitude": -122.006257
+    },
+    {
+      "name": "Danville",
+      "latitude": 37.825488,
+      "longitude": -121.978506
+    },
+    {
+      "name": "El Cerrito",
+      "latitude": 37.920578,
+      "longitude": -122.302502
+    },
+    {
+      "name": "Hercules",
+      "latitude": 38.005595,
+      "longitude": -122.257215
+    },
+    {
+      "name": "Lafayette",
+      "latitude": 37.892266,
+      "longitude": -122.116538
+    },
+    {
+      "name": "Martinez",
+      "latitude": 37.9900,
+      "longitude": -122.117663
+    },
+    {
+      "name": "Moraga",
+      "latitude": 37.846147,
+      "longitude": -122.123042
+    },
+    {
+      "name": "Oakley",
+      "latitude": 37.999593,
+      "longitude": -121.701909
+    },
+    {
+      "name": "Orinda",
+      "latitude": 37.883654,
+      "longitude": -122.177273
+    },
+    {
+      "name": "Pinole",
+      "latitude": 37.995657367004746,
+      "longitude": -122.28650136598483 
+    },
+    {
+      "name": "Pittsburg",
+      "latitude": 38.018412,
+      "longitude": -121.902114
+    },
+    {
+      "name": "Pleasant Hill",
+      "latitude": 37.955667,
+      "longitude": -122.078251
+    },
+    {
+      "name": "Richmond",
+      "latitude": 37.93686869546504,
+      "longitude": -122.34728404037315
+    }, 
+    {
+      "name": "San Pablo",
+      "latitude": 37.960044,
+      "longitude": -122.33685
+    },
+    {
+      "name": "San Ramon",
+      "latitude": 37.763435,
+      "longitude": -121.962762
+    },
+    {
+      "name": "Walnut Creek",
+      "latitude": 37.915803,
+      "longitude": -122.022623
+    }
+  ],
+  "cdps": [
+    {
+      "name": "Acalanes Ridge",
+      "latitude": 37.907023,
+      "longitude": -122.075029
+    },
+    {
+      "name": "Alamo",
+      "latitude": 37.855403,
+      "longitude": -122.022095
+    },
+    {
+      "name": "Alhambra Valley",
+      "latitude": 37.964898,
+      "longitude": -122.137656
+    },
+    {
+      "name": "Bay Point",
+      "latitude": 38.026542,
+      "longitude": -121.961129
+    },
+    {
+      "name": "Byron",
+      "latitude": 37.870432,
+      "longitude": -121.638964
+    },
+    {
+      "name": "Camino Tassajara",
+      "latitude": 37.795067,
+      "longitude": -121.885364
+    },
+    {
+      "name": "Castle Hill",
+      "latitude": 37.877064,
+      "longitude": -122.055249
+    },
+    {
+      "name": "Clyde",
+      "latitude": 38.02577,
+      "longitude": -122.027516
+    },
+    {
+      "name": "Contra Costa Centre",
+      "latitude": 37.925026,
+      "longitude": -122.053487
+    },
+    {
+      "name": "Crockett",
+      "latitude": 38.051163,
+      "longitude": -122.222326
+    },
+    {
+      "name": "Diablo",
+      "latitude": 37.837899,
+      "longitude": -121.958227
+    },
+    {
+      "name": "Discovery Bay",
+      "latitude": 37.903636,
+      "longitude": -121.598843
+    },
+    {
+      "name": "Bayview",
+      "latitude": 38.005182,
+      "longitude": -122.320258
+    },
+    {
+      "name": "Bayview",
+      "latitude": 40.764213,
+      "longitude": -124.181367
+    },
+    {
+      "name": "Bethel Island",
+      "latitude": 38.029054,
+      "longitude": -121.645096
+    },
+    {
+      "name": "Blackhawk",
+      "latitude": 37.816552,
+      "longitude": -121.902075
+    },
+    {
+      "name": "East Richmond Heights",
+      "latitude": 37.946939,
+      "longitude": -122.315629
+    },
+    {
+      "name": "El Cerrito",
+      "latitude": 33.837227,
+      "longitude": -117.524961
+    },
+    {
+      "name": "El Sobrante",
+      "latitude": 37.973283,
+      "longitude": -122.299195
+    },
+    {
+      "name": "Kensington",
+      "latitude": 37.906302,
+      "longitude": -122.281608
+    },
+    {
+      "name": "Knightsen",
+      "latitude": 37.966273,
+      "longitude": -121.649092
+    },
+    {
+      "name": "Mountain View",
+      "latitude": 38.009514,
+      "longitude": -122.117881
+    },
+    {
+      "name": "Norris Canyon",
+      "latitude": 37.750243,
+      "longitude": -121.97999
+    },
+    {
+      "name": "North Gate",
+      "latitude": 37.906606,
+      "longitude": -121.999689
+    },
+    {
+      "name": "Pacheco",
+      "latitude": 37.985355,
+      "longitude": -122.071853
+    },
+    {
+      "name": "Port Costa",
+      "latitude": 38.043575,
+      "longitude": -122.186952
+    },
+    {
+      "name": "Reliez Valley",
+      "latitude": 37.947268,
+      "longitude": -122.100416
+    },
+    {
+      "name": "Rodeo",
+      "latitude": 38.036312,
+      "longitude": -122.251643
+    },
+    {
+      "name": "Rollingwood",
+      "latitude": 37.96925,
+      "longitude": -122.329062
+    },
+    {
+      "name": "San Miguel",
+      "latitude": 37.887009,
+      "longitude": -122.038929
+    },
+    {
+      "name": "San Miguel",
+      "latitude": 35.751738,
+      "longitude": -120.690651
+    },
+    {
+      "name": "El Sobrante",
+      "latitude": 33.873107,
+      "longitude": -117.461642
+    },
+    {
+      "name": "Montalvin Manor",
+      "latitude": 37.997439,
+      "longitude": -122.328711
+    },
+    {
+      "name": "North Richmond",
+      "latitude": 37.961507,
+      "longitude": -122.370864
+    },
+    {
+      "name": "Saranap",
+      "latitude": 37.888181,
+      "longitude": -122.076114
+    },
+    {
+      "name": "Shell Ridge",
+      "latitude": 37.905817,
+      "longitude": -122.037979
+    },
+    {
+      "name": "Tara Hills",
+      "latitude": 37.990041,
+      "longitude": -122.318557
+    },
+    {
+      "name": "Vine Hill",
+      "latitude": 38.007458,
+      "longitude": -122.086367
+    }
+  ]
+}

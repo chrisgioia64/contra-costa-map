@@ -638,9 +638,9 @@ function calculateCentroid(feature) {
     return [sumLat / count, sumLng / count]; // Return as [lat, lng]
 }
 
-// Get label coordinates from locations.json or calculate centroid
+// Get label coordinates from latlon.json or calculate centroid
 function getLabelCoordinates(feature, labelText, isCity) {
-    // First, try to get coordinates from locations.json
+    // First, try to get coordinates from latlon.json
     if (locationsData) {
         const locations = isCity ? locationsData.cities : locationsData.cdps;
         if (locations && Array.isArray(locations)) {
@@ -651,7 +651,7 @@ function getLabelCoordinates(feature, labelText, isCity) {
         }
     }
     
-    // Fall back to calculating centroid if not found in locations.json
+    // Fall back to calculating centroid if not found in latlon.json
     return calculateCentroid(feature);
 }
 
@@ -674,7 +674,7 @@ function createLabelLayer(features, isCity) {
             continue;
         }
         
-        // Get coordinates from locations.json or calculate centroid
+        // Get coordinates from latlon.json or calculate centroid
         const coordinates = getLabelCoordinates(feature, labelText, isCity);
         if (!coordinates) {
             continue;
@@ -1341,8 +1341,8 @@ async function loadData() {
         const [citiesResponse, cdpResponse, countyResponse, locationsResponse] = await Promise.all([
             fetch('cities-final.json'),
             fetch('cdp-final.json'),
-            fetch('ContraCosta.json'),
-            fetch('locations.json')
+            fetch('Contra Costa.json'),
+            fetch('latlon.json')
         ]);
         
         if (!citiesResponse.ok) {
@@ -1352,10 +1352,10 @@ async function loadData() {
             throw new Error(`Failed to load cdp-final.json: ${cdpResponse.status}`);
         }
         if (!countyResponse.ok) {
-            throw new Error(`Failed to load ContraCosta.json: ${countyResponse.status}`);
+            throw new Error(`Failed to load Contra Costa.json: ${countyResponse.status}`);
         }
         if (!locationsResponse.ok) {
-            console.warn(`Failed to load locations.json: ${locationsResponse.status}. Will use calculated centroids.`);
+            console.warn(`Failed to load latlon.json: ${locationsResponse.status}. Will use calculated centroids.`);
         }
         
         cityData = await citiesResponse.json();
@@ -1368,7 +1368,7 @@ async function loadData() {
         console.log('Data loaded successfully!');
         console.log(`  cities-final.json: ${cityData.type}, ${cityData.features?.length || 0} features`);
         console.log(`  cdp-final.json: ${cdpData.type}, ${cdpData.features?.length || 0} features`);
-        console.log(`  ContraCosta.json: ${countyData.county}`);
+        console.log(`  Contra Costa.json: ${countyData.county}`);
         
         // Initialize map with loaded data
         loadLayers();
