@@ -5,8 +5,8 @@ if (typeof ChartDataLabels !== 'undefined') {
 
 // Initialize map centered on Walnut Creek with 20-25 mile radius view
 const walnutCreekCenter = [37.9061, -122.0649];
-// Determine initial zoom based on screen size (mobile: 10, desktop: 12)
-const initialZoom = window.innerWidth <= 768 ? 10 : 12;
+// Determine initial zoom based on screen size (mobile: 11, desktop: 12)
+const initialZoom = window.innerWidth <= 768 ? 11 : 12;
 
 const map = L.map('map', {
     center: walnutCreekCenter,
@@ -48,7 +48,7 @@ map.whenReady(function() {
         [walnutCreekCenter[0] - radiusLat, walnutCreekCenter[1] - radiusLng], // Southwest corner
         [walnutCreekCenter[0] + radiusLat, walnutCreekCenter[1] + radiusLng]  // Northeast corner
     );
-    const maxZoom = window.innerWidth <= 768 ? 10 : 12;
+    const maxZoom = window.innerWidth <= 768 ? 11 : 12;
     map.fitBounds(bounds, { padding: [50, 50], maxZoom: maxZoom, animate: false });
 });
 
@@ -850,7 +850,7 @@ function updateLegend(breaks, colors) {
         if (window.innerWidth <= 768) {
             const toggleButton = L.DomUtil.create('button', 'legend-toggle');
             toggleButton.textContent = 'Legend ▶'; // Start collapsed
-            toggleButton.style.cssText = 'display: block; width: 100%; padding: 10px; background: #f5f5f5; border: none; text-align: center; font-weight: bold; cursor: pointer; border-bottom: 1px solid #ddd;';
+            toggleButton.style.cssText = 'display: block; width: 100%; padding: 10px; background: #4A90E2; border: none; text-align: center; font-weight: bold; cursor: pointer; border-bottom: 1px solid #ddd; color: white;';
             toggleButton.onclick = function() {
                 div.classList.toggle('collapsed');
                 toggleButton.textContent = div.classList.contains('collapsed') ? 'Legend ▶' : 'Legend ▼';
@@ -1104,6 +1104,7 @@ function loadLayers() {
 // Update label visibility based on zoom level
 function updateLabelVisibility() {
     const currentZoom = map.getZoom();
+    // Show labels at zoom 12+ (both mobile and desktop)
     const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
     
     if (cityLabelLayer) {
@@ -1451,10 +1452,90 @@ function initSwipeGesture() {
     }, { passive: true });
 }
 
+// Initialize info panel toggle for mobile
+function initInfoPanelToggle() {
+    const infoPanel = document.getElementById('info-panel');
+    const infoToggle = document.getElementById('info-toggle');
+    
+    if (!infoPanel || !infoToggle) return;
+    
+    // Only add toggle functionality on mobile
+    if (window.innerWidth <= 768) {
+        // Start collapsed by default on mobile
+        infoPanel.classList.add('collapsed');
+        
+        // Add click handler to toggle button
+        infoToggle.addEventListener('click', function() {
+            const wasCollapsed = infoPanel.classList.contains('collapsed');
+            infoPanel.classList.toggle('collapsed');
+            infoToggle.textContent = infoPanel.classList.contains('collapsed') 
+                ? 'About CoCoMap ▶' 
+                : 'About CoCoMap ▼';
+            
+            // Adjust legend position based on info panel state
+            // Use setTimeout to allow CSS transition to complete
+            setTimeout(function() {
+                const legendControl = document.querySelector('.legend-control');
+                if (legendControl && window.innerWidth <= 768) {
+                    if (infoPanel.classList.contains('collapsed')) {
+                        legendControl.style.bottom = '50px';
+                    } else {
+                        // Position legend above expanded info panel
+                        const infoPanelHeight = infoPanel.offsetHeight;
+                        legendControl.style.bottom = Math.min(infoPanelHeight + 10, window.innerHeight - 200) + 'px';
+                    }
+                }
+            }, 50);
+        });
+        
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (window.innerWidth > 768) {
+                    // Desktop: remove collapsed class and hide toggle
+                    infoPanel.classList.remove('collapsed');
+                    infoToggle.style.display = 'none';
+                    // Reset legend position
+                    const legendControl = document.querySelector('.legend-control');
+                    if (legendControl) {
+                        legendControl.style.bottom = '';
+                    }
+                } else {
+                    // Mobile: show toggle and ensure collapsed state
+                    infoToggle.style.display = 'block';
+                    if (!infoPanel.classList.contains('collapsed')) {
+                        infoPanel.classList.add('collapsed');
+                        infoToggle.textContent = 'About CoCoMap ▶';
+                    }
+                    // Update legend position
+                    const legendControl = document.querySelector('.legend-control');
+                    if (legendControl) {
+                        if (infoPanel.classList.contains('collapsed')) {
+                            legendControl.style.bottom = '50px';
+                        } else {
+                            const infoPanelHeight = infoPanel.offsetHeight;
+                            legendControl.style.bottom = Math.min(infoPanelHeight + 10, window.innerHeight - 200) + 'px';
+                        }
+                    }
+                }
+            }, 250);
+        });
+    } else {
+        // Desktop: hide toggle button
+        infoToggle.style.display = 'none';
+    }
+}
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadData);
+    document.addEventListener('DOMContentLoaded', function() {
+        loadData();
+        initInfoPanelToggle();
+    });
 } else {
     loadData();
+    initInfoPanelToggle();
 }
 

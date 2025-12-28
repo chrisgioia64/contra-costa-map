@@ -290,31 +290,88 @@
             font-weight: normal;
         }
         
+        /* Hide toggle button on desktop */
+        #info-panel .info-toggle {
+            display: none;
+        }
+        
         /* Mobile responsive styles */
         @media (max-width: 768px) {
-            /* Hide info panel and layer visibility controls on mobile */
+            /* Info panel as collapsible panel on mobile */
             #info-panel {
-                display: none !important;
+                position: fixed !important;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                z-index: 999;
+                background: white;
+                box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+                padding: 0 !important;
+            }
+            
+            #info-panel.collapsed {
+                max-height: 50px;
+                overflow: hidden;
+            }
+            
+            #info-panel .info-toggle {
+                display: block;
+                width: 100%;
+                padding: 10px;
+                background: #4A90E2;
+                border: none;
+                text-align: center;
+                font-weight: bold;
+                cursor: pointer;
+                border-bottom: 1px solid #ddd;
+                color: white;
+                font-size: 14px;
+            }
+            
+            #info-panel .info-content {
+                padding: 15px;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            
+            #info-panel .info-content h1 {
+                font-size: 18px;
+                margin-bottom: 5px;
+            }
+            
+            #info-panel .info-content .subtitle {
+                font-size: 11px;
+            }
+            
+            #info-panel .info-content .source-label {
+                font-size: 10px;
+            }
+            
+            #info-panel .info-content a {
+                font-size: 11px;
             }
             
             .layer-visibility-control {
                 display: none !important;
             }
             
-            /* Data By controls - scrollable, 60% width, at top */
+            /* Data By controls - left-aligned, 50% width, at top */
             #controls {
                 position: fixed;
                 top: 10px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 60%;
-                max-width: 300px;
+                left: 10px;
+                width: 50%;
+                max-width: 250px;
                 z-index: 1001;
                 padding: 10px;
             }
             
             #controls label {
-                font-size: 12px;
+                display: none; /* Hide label on mobile */
             }
             
             #metric-select {
@@ -384,10 +441,10 @@
                 display: block;
             }
             
-            /* Legend at bottom, collapsible */
+            /* Legend at bottom, collapsible - positioned above info panel */
             .legend-control {
                 position: fixed !important;
-                bottom: 0;
+                bottom: 50px; /* Position above info panel when collapsed */
                 left: 0;
                 right: 0;
                 width: 100% !important;
@@ -397,6 +454,7 @@
                 z-index: 1000;
                 background: white;
                 box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+                padding: 0 !important;
             }
             
             .legend-control.collapsed {
@@ -408,18 +466,34 @@
                 display: block;
                 width: 100%;
                 padding: 10px;
-                background: #f5f5f5;
+                background: #4A90E2;
                 border: none;
                 text-align: center;
                 font-weight: bold;
                 cursor: pointer;
                 border-bottom: 1px solid #ddd;
+                color: white;
             }
             
             .legend-control .legend-content {
                 padding: 10px;
                 max-height: 200px;
                 overflow-y: auto;
+            }
+            
+            .legend-control .legend-content .legend {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 5px 10px;
+            }
+            
+            .legend-control .legend-content .legend h4 {
+                grid-column: 1 / -1;
+                margin: 0 0 8px 0;
+            }
+            
+            .legend-control .legend-content .legend-item {
+                margin-bottom: 3px;
             }
             
             /* Adjust legend position when data panel is open */
@@ -444,11 +518,15 @@
         </div>
     
     <div id="info-panel">
-        <h1>CocoMap</h1>
-        <div class="subtitle">Contra Costa County Demographic Map</div>
-        <div class="source-label">Source: <span class="source-value">Census 2020</span></div>
-        <div style="margin-top: 10px;">
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSc-VYoZJXmhflZHUfMFfjX4wGE149Z7efOyahzjg60tupLWCA/viewform?usp=sf_link" target="_blank" style="color: #0066cc; text-decoration: underline;">Take the trivia quiz</a>
+        <button class="info-toggle" id="info-toggle">About CoCoMap ▶</button>
+        <div class="info-content">
+            <h1>CocoMap</h1>
+            <div class="subtitle">Contra Costa County Demographic Map</div>
+            <div class="source-label">Source: <span class="source-value">Census 2020</span></div>
+            <div class="source-label" style="margin-top: 5px;">Maintained by Office of John Gioia | <a href="mailto:john_gioia@bos.cccounty.us" style="color: #0066cc; text-decoration: underline;">Email Us</a></div>
+            <div style="margin-top: 10px;">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSc-VYoZJXmhflZHUfMFfjX4wGE149Z7efOyahzjg60tupLWCA/viewform?usp=sf_link" target="_blank" style="color: #0066cc; text-decoration: underline;">Take the trivia quiz</a>
+            </div>
         </div>
     </div>
     
