@@ -848,21 +848,29 @@ function updateLegend(breaks, colors) {
         
         // Add toggle button for mobile
         if (window.innerWidth <= 768) {
+            // Start expanded by default on mobile (no collapsed class)
+            
             const toggleButton = L.DomUtil.create('button', 'legend-toggle');
-            toggleButton.textContent = 'Legend ▶'; // Start collapsed
             toggleButton.style.cssText = 'display: block; width: 100%; padding: 10px; background: #4A90E2; border: none; text-align: center; font-weight: bold; cursor: pointer; border-bottom: 1px solid #ddd; color: white;';
+            
+            // Function to update button text based on collapsed state
+            function updateButtonText() {
+                toggleButton.textContent = div.classList.contains('collapsed') ? 'Show Legend ▶' : 'Hide Legend ▼';
+            }
+            
+            // Set initial text
+            updateButtonText();
+            
             toggleButton.onclick = function() {
                 div.classList.toggle('collapsed');
-                toggleButton.textContent = div.classList.contains('collapsed') ? 'Legend ▶' : 'Legend ▼';
+                updateButtonText();
             };
+            
             div.appendChild(toggleButton);
             
             const contentDiv = L.DomUtil.create('div', 'legend-content');
             contentDiv.innerHTML = legendHTML;
             div.appendChild(contentDiv);
-            
-            // Start collapsed by default on mobile
-            div.classList.add('collapsed');
         } else {
             div.innerHTML = legendHTML;
         }
