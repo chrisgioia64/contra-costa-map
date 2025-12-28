@@ -69,12 +69,12 @@ const MIN_ZOOM_FOR_LABELS = 12; // Minimum zoom level to show city labels
 
 // Multi-hue sequential color scale (yellow for low, intermediate color, then target color for high)
 const colorScale = {
-    foreign_born: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#4caf50'],  // Yellow -> light green -> green
+    foreign_born: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#1b5e20'],  // Yellow -> light green -> dark green
     race: ['#fff9c4', '#fff59d', '#ffeb3b', '#c5e1a5', '#a5d6a7', '#81c784', '#66bb6a', '#1b5e20'],  // Yellow -> light green -> dark green
     white_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> green -> blue (7 colors)
     hispanic_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#f8c471', '#ff8a65', '#ff5722', '#e74c3c', '#a50f15'],  // Yellow -> orange -> dark red
     asian_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#d7bde2', '#ce93d8', '#ba68c8', '#9c27b0', '#805ad5'],  // Yellow -> light purple -> purple
-    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#e6550d']  // Yellow -> light orange -> orange
+    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400']  // Yellow -> light orange -> dark orange
 };
 
 // Get value for a feature based on current metric (returns percentage)
