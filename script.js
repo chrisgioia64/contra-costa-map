@@ -74,7 +74,9 @@ const colorScale = {
     white_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> green -> blue (7 colors)
     hispanic_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#f8c471', '#ff8a65', '#ff5722', '#e74c3c', '#a50f15'],  // Yellow -> orange -> dark red
     asian_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#d7bde2', '#ce93d8', '#ba68c8', '#9c27b0', '#805ad5'],  // Yellow -> light purple -> purple
-    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400']  // Yellow -> light orange -> dark orange
+    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400'],  // Yellow -> light orange -> dark orange
+    medical_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
+    calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900']  // Yellow -> light orange -> golden orange -> dark golden orange
 };
 
 // Get value for a feature based on current metric (returns percentage)
@@ -152,6 +154,38 @@ function getFeatureValue(feature) {
             return (black / totalPop) * 100;
         }
         return 0;
+    } else if (currentMetric === 'medical_households') {
+        // Get Medi-Cal Households percentage directly from data
+        let value = props['Medi-Cal Households'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle %, commas, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'calfresh_households') {
+        // Get Cal Fresh Households percentage directly from data
+        let value = props['Cal Fresh Households'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle %, commas, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
     }
     return 0;
 }
@@ -172,7 +206,7 @@ function calculateBreaks(features) {
         const sampleFeature = features[0];
         const sampleValue = getFeatureValue(sampleFeature);
         console.log(`Sample feature (${currentMetric}):`, sampleFeature.properties.CDTFA_CITY || sampleFeature.properties.NAMELSAD);
-        console.log(`Sample percentage value: ${sampleValue.toFixed(1)}%`);
+        console.log(`Sample percentage value: ${sampleValue !== null && !isNaN(sampleValue) ? sampleValue.toFixed(1) + '%' : 'No Data'}`);
     }
     
     console.log(`Found ${values.length} valid percentage values (including zeros) out of ${features.length} features`);
@@ -188,13 +222,21 @@ function calculateBreaks(features) {
     const min = values[0];
     const max = values[values.length - 1];
     
-    // Use quantile breaks (dynamic based on number of colors)
-    // Ensure we have at least 2 values for proper breaks
+    // Use evenly spaced breaks for medical_households, quantile breaks for others
     let breaks;
     if (values.length === 1) {
         // If only one value, create breaks around it
         breaks = [min, ...new Array(numColors - 1).fill(min), max];
+    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households') {
+        // Evenly spaced breaks for Medi-Cal and Cal Fresh
+        breaks = [min];
+        const range = max - min;
+        for (let i = 1; i < numColors; i++) {
+            breaks.push(min + (range * i / numColors));
+        }
+        breaks.push(max);
     } else {
+        // Use quantile breaks (dynamic based on number of colors)
         breaks = [min];
         for (let i = 1; i < numColors; i++) {
             breaks.push(values[Math.max(0, Math.floor(values.length * (i / numColors)))]);
@@ -310,6 +352,22 @@ function populateDataPanel(feature) {
         foreignBornPercent = parseFloat(foreignBornPercent.replace(/%/g, '').replace(/,/g, '')) || null;
     }
     
+    // Get Medi-Cal Households percentage
+    let medicalPercent = props['Medi-Cal Households'];
+    if (typeof medicalPercent === 'string') {
+        medicalPercent = parseFloat(medicalPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (medicalPercent !== null && medicalPercent !== undefined) {
+        medicalPercent = parseFloat(medicalPercent) || null;
+    }
+    
+    // Get Cal Fresh Households percentage
+    let calfreshPercent = props['Cal Fresh Households'];
+    if (typeof calfreshPercent === 'string') {
+        calfreshPercent = parseFloat(calfreshPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (calfreshPercent !== null && calfreshPercent !== undefined) {
+        calfreshPercent = parseFloat(calfreshPercent) || null;
+    }
+    
     // Get total population for percentage calculations
     let totalPop = props.Population || 0;
     if (typeof totalPop === 'string') {
@@ -415,6 +473,28 @@ function populateDataPanel(feature) {
         }
     }
     
+    // Helper function to create bar chart HTML with "No Data" handling
+    function createBarChartHTML(label, value, barColor = '#4CAF50') {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
+                    ${value >= 5 ? formatPercent(value) : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
     // Build HTML
     let html = `
         <div class="data-item">
@@ -422,18 +502,25 @@ function populateDataPanel(feature) {
             <div class="data-value">${formatNumber(totalPop)}</div>
         </div>
         
+        <div class="section-header">DEMOGRAPHIC (INDIVIDUALS)</div>
+        
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
             <canvas id="pie-chart-inline"></canvas>
         </div>
         
         <div class="data-item">
-            <div class="data-label">Foreign Born Population:</div>
+            <div class="data-label">Foreign Born:</div>
             <div class="progress-bar-container">
                 <div class="progress-bar" style="width: ${foreignBornPercent || 0}%;">
                     ${foreignBornPercent != null && foreignBornPercent >= 5 ? formatPercent(foreignBornPercent) : ''}
                 </div>
             </div>
         </div>
+        
+        <div class="section-header">ECONOMIC (HOUSEHOLDS)</div>
+        
+        ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
+        ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -449,6 +536,8 @@ function populateDataPanel(feature) {
     // Update pie chart (use setTimeout to ensure DOM is updated)
     setTimeout(() => {
         updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent);
+        // Update layer visibility position after pie chart renders
+        setTimeout(updateLayerVisibilityPosition, 50);
     }, 10);
 }
 
@@ -795,6 +884,12 @@ function updateLegend(breaks, colors) {
         case 'black_percent':
             metricLabel = 'Black Percentage';
             break;
+        case 'medical_households':
+            metricLabel = 'Medi-Cal Households Percentage';
+            break;
+        case 'calfresh_households':
+            metricLabel = 'Cal Fresh Households Percentage';
+            break;
         default:
             metricLabel = 'Percentage';
     }
@@ -841,7 +936,7 @@ function updateLegend(breaks, colors) {
     </div>`;
     
     // Create and add legend control
-    const legendPosition = window.innerWidth <= 768 ? 'bottomleft' : 'bottomright';
+    const legendPosition = window.innerWidth <= 768 ? 'bottomleft' : 'bottomleft';
     legendControl = L.control({ position: legendPosition });
     legendControl.onAdd = function() {
         const div = L.DomUtil.create('div', 'legend-control');
@@ -890,8 +985,8 @@ function createLayerVisibilityControl() {
         map.removeControl(layerVisibilityControl);
     }
     
-    // Create custom control
-    layerVisibilityControl = L.control({ position: 'bottomright' });
+    // Create custom control - positioned at bottomleft but will be centered with CSS
+    layerVisibilityControl = L.control({ position: 'bottomleft' });
     layerVisibilityControl.onAdd = function() {
         const div = L.DomUtil.create('div', 'layer-visibility-control');
         div.innerHTML = `
@@ -945,6 +1040,9 @@ function createLayerVisibilityControl() {
         return div;
     };
     layerVisibilityControl.addTo(map);
+    
+    // Update layer visibility control position based on data panel height
+    updateLayerVisibilityPosition();
     
     // Add zoom control last (at bottom) to ensure proper stacking: legend -> checkboxes -> zoom
     if (!zoomControl) {
@@ -1304,6 +1402,32 @@ function populateCountyPanel() {
     const asianPercent = countyData.percent_asian || 0;
     const otherPercent = 100 - (whitePercent + latinoPercent + blackPercent + asianPercent);
     
+    // Get Medi-Cal and Cal Fresh data from county data
+    let medicalPercent = countyData.percent_medical_households || null;
+    let calfreshPercent = countyData.percent_calfresh_households || null;
+    
+    // Helper function to create bar chart HTML with "No Data" handling
+    function createBarChartHTML(label, value, barColor = '#4CAF50') {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
+                    ${value >= 5 ? formatPercent(value) : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
     // Build HTML
     let html = `
         <div class="data-item">
@@ -1311,18 +1435,25 @@ function populateCountyPanel() {
             <div class="data-value">${formatNumber(countyData.population)}</div>
         </div>
         
+        <div class="section-header">DEMOGRAPHIC (INDIVIDUALS)</div>
+        
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
             <canvas id="pie-chart-inline"></canvas>
         </div>
         
         <div class="data-item">
-            <div class="data-label">Foreign Born Population:</div>
+            <div class="data-label">Foreign Born:</div>
             <div class="progress-bar-container">
                 <div class="progress-bar" style="width: ${countyData.percent_foreign_born || 0}%;">
                     ${countyData.percent_foreign_born >= 5 ? formatPercent(countyData.percent_foreign_born) : ''}
                 </div>
             </div>
         </div>
+        
+        <div class="section-header">ECONOMIC (HOUSEHOLDS)</div>
+        
+        ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
+        ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -1338,6 +1469,8 @@ function populateCountyPanel() {
     // Update pie chart (use setTimeout to ensure DOM is updated)
     setTimeout(() => {
         updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent);
+        // Update layer visibility position after pie chart renders
+        setTimeout(updateLayerVisibilityPosition, 50);
     }, 10);
 }
 
@@ -1396,6 +1529,35 @@ async function loadData() {
     }
 }
 
+// Update layer visibility control position to be below data panel
+function updateLayerVisibilityPosition() {
+    if (window.innerWidth <= 768) return; // Only for desktop
+    
+    const dataPanel = document.getElementById('data-panel');
+    const layerControl = document.querySelector('.layer-visibility-control');
+    
+    if (dataPanel && layerControl) {
+        const panelVisible = dataPanel.style.display !== 'none';
+        
+        if (panelVisible && dataPanel.offsetHeight > 0) {
+            // Position directly below the data panel
+            const panelRect = dataPanel.getBoundingClientRect();
+            const panelBottom = panelRect.bottom;
+            const viewportHeight = window.innerHeight;
+            const distanceFromBottom = viewportHeight - panelBottom;
+            
+            // Position it with a small gap (10px) below the panel
+            layerControl.style.top = (panelBottom + 10) + 'px';
+            layerControl.style.bottom = 'auto';
+            layerControl.style.right = '0px';
+        } else {
+            // If panel is hidden, position at bottom
+            layerControl.style.bottom = '10px';
+            layerControl.style.top = 'auto';
+        }
+    }
+}
+
 // Helper functions for mobile-responsive panel
 function showDataPanel() {
     const panel = document.getElementById('data-panel');
@@ -1414,6 +1576,10 @@ function showDataPanel() {
         panel.style.display = 'block';
         panel.classList.remove('show');
     }
+    
+    // Update layer visibility control position after showing panel
+    // Use a longer delay to ensure DOM is fully rendered and panel height is calculated
+    setTimeout(updateLayerVisibilityPosition, 100);
 }
 
 function hideDataPanel() {
@@ -1510,6 +1676,8 @@ function initInfoPanelToggle() {
                     if (legendControl) {
                         legendControl.style.bottom = '';
                     }
+                    // Update layer visibility position
+                    updateLayerVisibilityPosition();
                 } else {
                     // Mobile: show toggle and ensure collapsed state
                     infoToggle.style.display = 'block';
