@@ -1034,6 +1034,8 @@
         "Native": 894,
         "Foreign": 131,
         "Foreign Born (%)": 12.8,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 131
       }
     },
@@ -3688,6 +3690,8 @@
         "Native": 12515,
         "Foreign": 1926,
         "Foreign Born (%)": 13.3,
+        "Medi-Cal Households": 10.35,
+        "Cal Fresh Households": 1.87,
         "Foreign_Born": 1926
       }
     },
@@ -6426,6 +6430,8 @@
         "Native": 925,
         "Foreign": 12,
         "Foreign Born (%)": 1.3,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 12
       }
     },
@@ -8264,6 +8270,8 @@
         "Native": 14789,
         "Foreign": 9276,
         "Foreign Born (%)": 38.5,
+        "Medi-Cal Households": 98.95,
+        "Cal Fresh Households": 32.55,
         "Foreign_Born": 9276
       }
     },
@@ -9330,6 +9338,8 @@
         "Native": 1510,
         "Foreign": 366,
         "Foreign Born (%)": 19.5,
+        "Medi-Cal Households": 60.16,
+        "Cal Fresh Households": 18.45,
         "Foreign_Born": 366
       }
     },
@@ -9792,6 +9802,8 @@
         "Native": 3691,
         "Foreign": 2704,
         "Foreign Born (%)": 42.3,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 2704
       }
     },
@@ -10458,6 +10470,8 @@
         "Native": 930,
         "Foreign": 373,
         "Foreign Born (%)": 28.6,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 373
       }
     },
@@ -10856,6 +10870,8 @@
         "Native": 642,
         "Foreign": 74,
         "Foreign Born (%)": 10.3,
+        "Medi-Cal Households": 0.0,
+        "Cal Fresh Households": 0.0,
         "Foreign_Born": 74
       }
     },
@@ -12342,6 +12358,8 @@
         "Native": 4524,
         "Foreign": 2603,
         "Foreign Born (%)": 36.5,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 2603
       }
     },
@@ -13680,6 +13698,8 @@
         "Native": 3197,
         "Foreign": 445,
         "Foreign Born (%)": 12.2,
+        "Medi-Cal Households": 30.25,
+        "Cal Fresh Households": 13.86,
         "Foreign_Born": 445
       }
     },
@@ -14482,6 +14502,8 @@
         "Native": 892,
         "Foreign": 180,
         "Foreign Born (%)": 16.8,
+        "Medi-Cal Households": 4.72,
+        "Cal Fresh Households": 0.0,
         "Foreign_Born": 180
       }
     },
@@ -15492,6 +15514,8 @@
         "Native": 13550,
         "Foreign": 1693,
         "Foreign Born (%)": 11.1,
+        "Medi-Cal Households": 21.59,
+        "Cal Fresh Households": 7.51,
         "Foreign_Born": 1693
       }
     },
@@ -15882,6 +15906,8 @@
         "Native": 1444,
         "Foreign": 1089,
         "Foreign Born (%)": 43.0,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 1089
       }
     },
@@ -16596,6 +16622,8 @@
         "Native": 1444,
         "Foreign": 1089,
         "Foreign Born (%)": 43.0,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 1089
       }
     },
@@ -18088,6 +18116,8 @@
         "Native": 1572,
         "Foreign": 572,
         "Foreign Born (%)": 26.7,
+        "Medi-Cal Households": 51.88,
+        "Cal Fresh Households": 27.57,
         "Foreign_Born": 572
       }
     },
@@ -20066,6 +20096,8 @@
         "Native": 7949,
         "Foreign": 2455,
         "Foreign Born (%)": 23.6,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 2455
       }
     },
@@ -20964,6 +20996,8 @@
         "Native": 2856,
         "Foreign": 455,
         "Foreign Born (%)": 13.7,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 455
       }
     },
@@ -22966,6 +23000,8 @@
         "Native": 17559,
         "Foreign": 8222,
         "Foreign Born (%)": 31.9,
+        "Medi-Cal Households": 28.3,
+        "Cal Fresh Households": 8.74,
         "Foreign_Born": 8222
       }
     },
@@ -27530,6 +27566,8 @@
         "Native": 10680,
         "Foreign": 5143,
         "Foreign Born (%)": 32.5,
+        "Medi-Cal Households": 64.12,
+        "Cal Fresh Households": 23.22,
         "Foreign_Born": 5143
       }
     },
@@ -28436,6 +28474,8 @@
         "Native": 4582,
         "Foreign": 710,
         "Foreign Born (%)": 13.4,
+        "Medi-Cal Households": 11.04,
+        "Cal Fresh Households": 3.11,
         "Foreign_Born": 710
       }
     },
@@ -29618,6 +29658,8 @@
         "Native": 1578,
         "Foreign": 440,
         "Foreign Born (%)": 21.8,
+        "Medi-Cal Households": 8.88,
+        "Cal Fresh Households": 3.78,
         "Foreign_Born": 440
       }
     },
@@ -30636,6 +30678,8 @@
         "Native": 1853,
         "Foreign": 219,
         "Foreign Born (%)": 10.6,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 219
       }
     },
@@ -31474,6 +31518,8 @@
         "Native": 324,
         "Foreign": 522,
         "Foreign Born (%)": 61.7,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 522
       }
     },
@@ -32204,6 +32250,8 @@
         "Native": 435,
         "Foreign": 284,
         "Foreign Born (%)": 39.5,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 284
       }
     },
@@ -33434,6 +33482,8 @@
         "Native": 3613,
         "Foreign": 1044,
         "Foreign Born (%)": 22.4,
+        "Medi-Cal Households": 46.38,
+        "Cal Fresh Households": 17.06,
         "Foreign_Born": 1044
       }
     },
@@ -34684,6 +34734,8 @@
         "Native": 175,
         "Foreign": 19,
         "Foreign Born (%)": 9.8,
+        "Medi-Cal Households": 24.04,
+        "Cal Fresh Households": 0.0,
         "Foreign_Born": 19
       }
     },
@@ -36666,6 +36718,8 @@
         "Native": 2347,
         "Foreign": 659,
         "Foreign Born (%)": 21.9,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 659
       }
     },
@@ -37772,6 +37826,8 @@
         "Native": 6750,
         "Foreign": 1985,
         "Foreign Born (%)": 22.7,
+        "Medi-Cal Households": 55.61,
+        "Cal Fresh Households": 26.57,
         "Foreign_Born": 1985
       }
     },
@@ -38238,6 +38294,8 @@
         "Native": 1663,
         "Foreign": 1960,
         "Foreign Born (%)": 54.1,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 1960
       }
     },
@@ -39588,6 +39646,8 @@
         "Native": 3482,
         "Foreign": 509,
         "Foreign Born (%)": 12.8,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 509
       }
     },
@@ -40750,6 +40810,8 @@
         "Native": 3482,
         "Foreign": 509,
         "Foreign Born (%)": 12.8,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 509
       }
     },
@@ -42964,6 +43026,8 @@
         "Native": 10680,
         "Foreign": 5143,
         "Foreign Born (%)": 32.5,
+        "Medi-Cal Households": 64.12,
+        "Cal Fresh Households": 23.22,
         "Foreign_Born": 5143
       }
     },
@@ -43410,6 +43474,8 @@
         "Native": 817,
         "Foreign": 1263,
         "Foreign Born (%)": 60.7,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 1263
       }
     },
@@ -44442,6 +44508,8 @@
         "Native": 2398,
         "Foreign": 1537,
         "Foreign Born (%)": 39.1,
+        "Medi-Cal Households": 68.91,
+        "Cal Fresh Households": 0.0,
         "Foreign_Born": 1537
       }
     },
@@ -45868,6 +45936,8 @@
         "Native": 5018,
         "Foreign": 675,
         "Foreign Born (%)": 11.9,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 675
       }
     },
@@ -46874,6 +46944,8 @@
         "Native": 896,
         "Foreign": 102,
         "Foreign Born (%)": 10.2,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 102
       }
     },
@@ -47632,6 +47704,8 @@
         "Native": 3599,
         "Foreign": 1313,
         "Foreign Born (%)": 26.7,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 1313
       }
     },
@@ -48926,6 +49000,8 @@
         "Native": 3256,
         "Foreign": 361,
         "Foreign Born (%)": 10.0,
+        "Medi-Cal Households": null,
+        "Cal Fresh Households": null,
         "Foreign_Born": 361
       }
     }
