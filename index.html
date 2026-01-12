@@ -142,7 +142,61 @@
             border-radius: 5px;
             margin-top: 8px;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            cursor: pointer;
+        }
+        
+        #data-panel .progress-bar-container::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+            display: block;
+        }
+        
+        #data-panel .progress-bar-container::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 2px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+            display: block;
+        }
+        
+        #data-panel .progress-bar-container[data-tooltip]:hover::after,
+        #data-panel .progress-bar-container[data-tooltip]:hover::before {
+            opacity: 1;
+        }
+        
+        /* Only show tooltip when data-tooltip attribute exists and is not empty */
+        #data-panel .progress-bar-container:not([data-tooltip])::after,
+        #data-panel .progress-bar-container:not([data-tooltip])::before,
+        #data-panel .progress-bar-container[data-tooltip=""]::after,
+        #data-panel .progress-bar-container[data-tooltip=""]::before {
+            display: none;
         }
         
         #data-panel .progress-bar {
@@ -563,6 +617,7 @@
                 <optgroup label="ECONOMIC (HOUSEHOLDS)">
                     <option value="medical_households">% Medi-Cal</option>
                     <option value="calfresh_households">% Cal Fresh</option>
+                    <option value="renter">% Renter</option>
                 </optgroup>
             </select>
         </div>

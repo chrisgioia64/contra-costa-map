@@ -76,7 +76,8 @@ const colorScale = {
     asian_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#d7bde2', '#ce93d8', '#ba68c8', '#9c27b0', '#805ad5'],  // Yellow -> light purple -> purple
     black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400'],  // Yellow -> light orange -> dark orange
     medical_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
-    calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900']  // Yellow -> light orange -> golden orange -> dark golden orange
+    calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900'],  // Yellow -> light orange -> golden orange -> dark golden orange
+    renter: ['#fff9c4', '#fff59d', '#ffeb3b', '#e1bee7', '#ce93d8', '#ba68c8', '#9c27b0', '#7b1fa2']  // 3 yellow -> 2 intermediate -> 3 purple (8 colors)
 };
 
 // Get value for a feature based on current metric (returns percentage)
@@ -186,6 +187,22 @@ function getFeatureValue(feature) {
         
         // Return the value if it's a valid number, otherwise null (No Data)
         return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'renter') {
+        // Get Renter percentage directly from data
+        let value = props['Renter'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle %, commas, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
     }
     return 0;
 }
@@ -227,8 +244,8 @@ function calculateBreaks(features) {
     if (values.length === 1) {
         // If only one value, create breaks around it
         breaks = [min, ...new Array(numColors - 1).fill(min), max];
-    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households') {
-        // Evenly spaced breaks for Medi-Cal and Cal Fresh
+    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households' || currentMetric === 'renter') {
+        // Evenly spaced breaks for Medi-Cal, Cal Fresh, and Renter
         breaks = [min];
         const range = max - min;
         for (let i = 1; i < numColors; i++) {
@@ -368,6 +385,14 @@ function populateDataPanel(feature) {
         calfreshPercent = parseFloat(calfreshPercent) || null;
     }
     
+    // Get Renter percentage
+    let renterPercent = props['Renter'];
+    if (typeof renterPercent === 'string') {
+        renterPercent = parseFloat(renterPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (renterPercent !== null && renterPercent !== undefined) {
+        renterPercent = parseFloat(renterPercent) || null;
+    }
+    
     // Get total population for percentage calculations
     let totalPop = props.Population || 0;
     if (typeof totalPop === 'string') {
@@ -477,10 +502,11 @@ function populateDataPanel(feature) {
     function createBarChartHTML(label, value, barColor = '#4CAF50') {
         const hasData = value !== null && value !== undefined && !isNaN(value);
         if (hasData) {
+            const roundedPercent = Math.round(value);
             return `
         <div class="data-item">
             <div class="data-label">${label}:</div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container" data-tooltip="${roundedPercent}%">
                 <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
                     ${value >= 5 ? formatPercent(value) : ''}
                 </div>
@@ -510,7 +536,7 @@ function populateDataPanel(feature) {
         
         <div class="data-item">
             <div class="data-label">Foreign Born:</div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container" data-tooltip="${foreignBornPercent != null ? Math.round(foreignBornPercent) + '%' : '0%'}">
                 <div class="progress-bar" style="width: ${foreignBornPercent || 0}%;">
                     ${foreignBornPercent != null && foreignBornPercent >= 5 ? formatPercent(foreignBornPercent) : ''}
                 </div>
@@ -521,6 +547,7 @@ function populateDataPanel(feature) {
         
         ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
         ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
+        ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -1402,18 +1429,20 @@ function populateCountyPanel() {
     const asianPercent = countyData.percent_asian || 0;
     const otherPercent = 100 - (whitePercent + latinoPercent + blackPercent + asianPercent);
     
-    // Get Medi-Cal and Cal Fresh data from county data
+    // Get Medi-Cal, Cal Fresh, and Renter data from county data
     let medicalPercent = countyData.percent_medical_households || null;
     let calfreshPercent = countyData.percent_calfresh_households || null;
+    let renterPercent = countyData.percent_renter || null;
     
     // Helper function to create bar chart HTML with "No Data" handling
     function createBarChartHTML(label, value, barColor = '#4CAF50') {
         const hasData = value !== null && value !== undefined && !isNaN(value);
         if (hasData) {
+            const roundedPercent = Math.round(value);
             return `
         <div class="data-item">
             <div class="data-label">${label}:</div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container" data-tooltip="${roundedPercent}%">
                 <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
                     ${value >= 5 ? formatPercent(value) : ''}
                 </div>
@@ -1443,7 +1472,7 @@ function populateCountyPanel() {
         
         <div class="data-item">
             <div class="data-label">Foreign Born:</div>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container" data-tooltip="${Math.round(countyData.percent_foreign_born || 0)}%">
                 <div class="progress-bar" style="width: ${countyData.percent_foreign_born || 0}%;">
                     ${countyData.percent_foreign_born >= 5 ? formatPercent(countyData.percent_foreign_born) : ''}
                 </div>
@@ -1454,6 +1483,7 @@ function populateCountyPanel() {
         
         ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
         ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
+        ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
     `;
     
     // Destroy existing pie chart before replacing HTML
