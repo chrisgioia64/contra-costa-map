@@ -3589,8 +3589,10 @@
         "Foreign": 27579,
         "Foreign Born (%)": 23.8,
         "Foreign_Born": 27579,
-        "Medi-Cal Households": 76.71,
-        "Cal Fresh Households": 35.39
+        "Medi-Cal Households": 76.2,
+        "Cal Fresh Households": 34.75,
+        "Homeowner": 63.47,
+        "Renter": 36.53
       },
       "id": 13
     },
@@ -7026,8 +7028,10 @@
         "Foreign": 12164,
         "Foreign Born (%)": 18.8,
         "Foreign_Born": 12164,
-        "Medi-Cal Households": 37.73,
-        "Cal Fresh Households": 13.82
+        "Medi-Cal Households": 35.41,
+        "Cal Fresh Households": 12.86,
+        "Homeowner": 81.96,
+        "Renter": 18.04
       },
       "id": 48
     },
@@ -9123,8 +9127,10 @@
         "Foreign": 1551,
         "Foreign Born (%)": 14.1,
         "Foreign_Born": 1551,
-        "Medi-Cal Households": 16.7,
-        "Cal Fresh Households": 5.99
+        "Medi-Cal Households": 12.72,
+        "Cal Fresh Households": 4.06,
+        "Homeowner": 90.29,
+        "Renter": 9.71
       },
       "id": 78
     },
@@ -14854,8 +14860,10 @@
         "Foreign": 31815,
         "Foreign Born (%)": 25.6,
         "Foreign_Born": 31815,
-        "Medi-Cal Households": 50.55,
-        "Cal Fresh Households": 15.35
+        "Medi-Cal Households": 49.21,
+        "Cal Fresh Households": 14.94,
+        "Homeowner": 61.37,
+        "Renter": 38.63
       },
       "id": 90
     },
@@ -21195,8 +21203,10 @@
         "Foreign": 8229,
         "Foreign Born (%)": 18.9,
         "Foreign_Born": 8229,
-        "Medi-Cal Households": 15.24,
-        "Cal Fresh Households": 3.27
+        "Medi-Cal Households": 10.74,
+        "Cal Fresh Households": 2.4,
+        "Homeowner": 85.8,
+        "Renter": 14.2
       },
       "id": 106
     },
@@ -24540,8 +24550,10 @@
         "Foreign": 8222,
         "Foreign Born (%)": 31.9,
         "Foreign_Born": 8222,
-        "Medi-Cal Households": 28.3,
-        "Cal Fresh Households": 8.74
+        "Medi-Cal Households": 27.83,
+        "Cal Fresh Households": 8.57,
+        "Homeowner": 57.3,
+        "Renter": 42.7
       },
       "id": 125
     },
@@ -33157,8 +33169,10 @@
         "Foreign": 9135,
         "Foreign Born (%)": 34.8,
         "Foreign_Born": 9135,
-        "Medi-Cal Households": 37.35,
-        "Cal Fresh Households": 14.82
+        "Medi-Cal Households": 37.24,
+        "Cal Fresh Households": 14.68,
+        "Homeowner": 81.12,
+        "Renter": 18.88
       },
       "id": 175
     },
@@ -37490,8 +37504,10 @@
         "Foreign": 3554,
         "Foreign Born (%)": 14.1,
         "Foreign_Born": 3554,
-        "Medi-Cal Households": 13.98,
-        "Cal Fresh Households": 3.51
+        "Medi-Cal Households": 12.13,
+        "Cal Fresh Households": 3.17,
+        "Homeowner": 77.26,
+        "Renter": 22.74
       },
       "id": 211
     },
@@ -48281,8 +48297,10 @@
         "Foreign": 4687,
         "Foreign Born (%)": 12.7,
         "Foreign_Born": 4687,
-        "Medi-Cal Households": 35.47,
-        "Cal Fresh Households": 13.37
+        "Medi-Cal Households": 26.92,
+        "Cal Fresh Households": 10.17,
+        "Homeowner": 70.12,
+        "Renter": 29.88
       },
       "id": 252
     },
@@ -51318,8 +51336,10 @@
         "Foreign": 3199,
         "Foreign Born (%)": 19.1,
         "Foreign_Born": 3199,
-        "Medi-Cal Households": 12.3,
-        "Cal Fresh Households": 3.39
+        "Medi-Cal Households": 12.07,
+        "Cal Fresh Households": 3.21,
+        "Homeowner": 84.33,
+        "Renter": 15.67
       },
       "id": 273
     },
@@ -54243,8 +54263,10 @@
         "Foreign": 7890,
         "Foreign Born (%)": 17.8,
         "Foreign_Born": 7890,
-        "Medi-Cal Households": 52.33,
-        "Cal Fresh Households": 20.44
+        "Medi-Cal Households": 49.91,
+        "Cal Fresh Households": 19.08,
+        "Homeowner": 77.13,
+        "Renter": 22.87
       },
       "id": 293
     },
@@ -57904,8 +57926,10 @@
         "Foreign": 3882,
         "Foreign Born (%)": 19.9,
         "Foreign_Born": 3882,
-        "Medi-Cal Households": 11.57,
-        "Cal Fresh Households": 4.31
+        "Medi-Cal Households": 11.69,
+        "Cal Fresh Households": 4.27,
+        "Homeowner": 92.16,
+        "Renter": 7.84
       },
       "id": 299
     },
@@ -66501,8 +66525,10 @@
         "Foreign": 5614,
         "Foreign Born (%)": 29.8,
         "Foreign_Born": 5614,
-        "Medi-Cal Households": 39.69,
-        "Cal Fresh Households": 15.1
+        "Medi-Cal Households": 39.83,
+        "Cal Fresh Households": 14.83,
+        "Homeowner": 75.88,
+        "Renter": 24.12
       },
       "id": 320
     },
@@ -77368,8 +77394,10 @@
         "Foreign": 24326,
         "Foreign Born (%)": 32.1,
         "Foreign_Born": 24326,
-        "Medi-Cal Households": 69.47,
-        "Cal Fresh Households": 28.05
+        "Medi-Cal Households": 71.42,
+        "Cal Fresh Households": 28.4,
+        "Homeowner": 61.04,
+        "Renter": 38.96
       },
       "id": 322
     },
@@ -83147,8 +83175,10 @@
         "Foreign": 6364,
         "Foreign Born (%)": 18.5,
         "Foreign_Born": 6364,
-        "Medi-Cal Households": 31.85,
-        "Cal Fresh Households": 12.13
+        "Medi-Cal Households": 31.35,
+        "Cal Fresh Households": 11.9,
+        "Homeowner": 63.92,
+        "Renter": 36.08
       },
       "id": 325
     },
@@ -212306,8 +212336,10 @@
         "Foreign": 39860,
         "Foreign Born (%)": 34.5,
         "Foreign_Born": 39860,
-        "Medi-Cal Households": 68.91,
-        "Cal Fresh Households": 26.77
+        "Medi-Cal Households": 68.56,
+        "Cal Fresh Households": 26.35,
+        "Homeowner": 52.52,
+        "Renter": 47.48
       },
       "id": 347
     },
@@ -215235,8 +215267,10 @@
         "Foreign": 12955,
         "Foreign Born (%)": 40.8,
         "Foreign_Born": 12955,
-        "Medi-Cal Households": 116.99,
-        "Cal Fresh Households": 38.92
+        "Medi-Cal Households": 80.29,
+        "Cal Fresh Households": 26.41,
+        "Homeowner": 42.71,
+        "Renter": 57.29
       },
       "id": 383
     },
@@ -218476,8 +218510,10 @@
         "Foreign": 31867,
         "Foreign Born (%)": 37.2,
         "Foreign_Born": 31867,
-        "Medi-Cal Households": 20.23,
-        "Cal Fresh Households": 5.46
+        "Medi-Cal Households": 19.94,
+        "Cal Fresh Households": 5.4,
+        "Homeowner": 70.51,
+        "Renter": 29.49
       },
       "id": 385
     },
@@ -231923,8 +231959,10 @@
         "Foreign": 16444,
         "Foreign Born (%)": 23.6,
         "Foreign_Born": 16444,
-        "Medi-Cal Households": 22.45,
-        "Cal Fresh Households": 7.44
+        "Medi-Cal Households": 17.47,
+        "Cal Fresh Households": 5.58,
+        "Homeowner": 64.48,
+        "Renter": 35.52
       },
       "id": 456
     }
