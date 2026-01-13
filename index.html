@@ -388,6 +388,72 @@
             display: none;
         }
         
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .modal-content h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .modal-body {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .modal-body p {
+            margin: 10px 0;
+        }
+        
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            cursor: pointer;
+        }
+        
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        #sources-link {
+            cursor: pointer;
+        }
+        
+        #sources-link:hover {
+            text-decoration: underline;
+        }
+        
         /* Mobile responsive styles */
         @media (max-width: 768px) {
             /* Info panel as collapsible panel on mobile */
@@ -630,7 +696,20 @@
             <div class="source-label">Source: <span class="source-value">Census 2020</span></div>
             <div class="source-label" style="margin-top: 5px;">Maintained by Office of John Gioia | <a href="mailto:john_gioia@bos.cccounty.us" style="color: #0066cc; text-decoration: underline;">Email Us</a></div>
             <div style="margin-top: 10px;">
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSc-VYoZJXmhflZHUfMFfjX4wGE149Z7efOyahzjg60tupLWCA/viewform?usp=sf_link" target="_blank" style="color: #0066cc; text-decoration: underline;">Take the trivia quiz</a>
+                <a href="#" id="sources-link" style="color: #0066cc; text-decoration: underline; font-size: 11px;">Sources</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sources Modal -->
+    <div id="sources-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>Data Sources</h2>
+            <div class="modal-body">
+                <p><strong>Population by Race/Ethnicity</strong> – Source: US Census Bureau Decennial Census, 2020</p>
+                <p><strong>Population by Nativity</strong> - 2019-2023 American Community Survey 5-Year Estimates</p>
+                <p><strong>Housing: Renter vs. Homeowner</strong> - 2019-2023 American Community Survey 5-Year Estimates</p>
             </div>
         </div>
     </div>
