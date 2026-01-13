@@ -528,7 +528,10 @@ function populateDataPanel(feature) {
             <div class="data-value">${formatNumber(totalPop)}</div>
         </div>
         
-        <div class="section-header">DEMOGRAPHIC (INDIVIDUALS)</div>
+        <div class="section-header">
+            DEMOGRAPHIC (INDIVIDUALS)
+            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity. &quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
+        </div>
         
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
             <canvas id="pie-chart-inline"></canvas>
@@ -1464,7 +1467,10 @@ function populateCountyPanel() {
             <div class="data-value">${formatNumber(countyData.population)}</div>
         </div>
         
-        <div class="section-header">DEMOGRAPHIC (INDIVIDUALS)</div>
+        <div class="section-header">
+            DEMOGRAPHIC (INDIVIDUALS)
+            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity. &quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
+        </div>
         
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
             <canvas id="pie-chart-inline"></canvas>
