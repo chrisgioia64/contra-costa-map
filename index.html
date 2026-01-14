@@ -513,12 +513,28 @@
             text-decoration: none;
         }
         
-        #sources-link {
+        #sources-link, #terms-link {
             cursor: pointer;
         }
         
-        #sources-link:hover {
+        #sources-link:hover, #terms-link:hover {
             text-decoration: underline;
+        }
+        
+        #info-panel a[href*="github.com"] {
+            transition: opacity 0.2s ease;
+        }
+        
+        #info-panel a[href*="github.com"]:hover {
+            opacity: 0.7;
+        }
+        
+        #info-panel a[href*="github.com"] svg {
+            transition: transform 0.2s ease;
+        }
+        
+        #info-panel a[href*="github.com"]:hover svg {
+            transform: scale(1.1);
         }
         
         /* Mobile responsive styles */
@@ -760,10 +776,14 @@
         <div class="info-content">
             <h1>CocoMap</h1>
             <div class="subtitle">Contra Costa County Demographic Map</div>
-            <div class="source-label">Source: <span class="source-value">Census 2020</span></div>
-            <div class="source-label" style="margin-top: 5px;">Maintained by Office of John Gioia | <a href="mailto:john_gioia@bos.cccounty.us" style="color: #0066cc; text-decoration: underline;">Email Us</a></div>
-            <div style="margin-top: 10px;">
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
                 <a href="#" id="sources-link" style="color: #0066cc; text-decoration: underline; font-size: 11px;">Sources</a>
+                <a href="#" id="terms-link" style="color: #0066cc; text-decoration: underline; font-size: 11px;">Terms</a>
+                <a href="https://github.com/chrisgioia64/contra-costa-map/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; text-decoration: none;">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="color: #333;">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </div>
@@ -777,6 +797,29 @@
                 <p><strong>Population by Race/Ethnicity</strong> – US Census Bureau Decennial Census, 2020</p>
                 <p><strong>Foreign Born</strong> - 2019-2023 American Community Survey 5-Year Estimates</p>
                 <p><strong>Housing: Renter</strong> - 2019-2023 American Community Survey 5-Year Estimates</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="modal-close">&times;</span>
+            <h2>Terms of Use</h2>
+            <div class="modal-body">
+                <p><strong>1. "As-Is" Information</strong></p>
+                <p>This application is provided for informational and community outreach purposes only. While we strive to present data accurately, the software and the information within it are provided on an "as-is" and "as-available" basis. The developer makes no representations or warranties of any kind, express or implied, regarding the completeness, accuracy, reliability, or suitability of the data map.</p>
+                
+                <p><strong>2. Source of Truth</strong></p>
+                <p>The data displayed in this application is sourced directly from the Contra Costa County Employment & Human Services Department (EHSD) and the US Census data.</p>
+                <p><strong>Translation Risk:</strong> This application acts as a visualization tool; errors may occur during the automated processing or rendering of raw data.</p>
+                <p><strong>Verification:</strong> Users should not rely solely on this map for legal, financial, or eligibility decisions.</p>
+                
+                <p><strong>3. Limitation of Liability</strong></p>
+                <p>In no event shall the volunteer developers, the Office of Supervisor John Gioia, or Contra Costa County be liable for any loss or damage—including without limitation, indirect or consequential loss or damage—arising from the use of, or reliance on, the information presented in this application.</p>
+                
+                <p><strong>4. Technical Maintenance</strong></p>
+                <p>This tool is maintained by private volunteers. Technical functionality is governed by the Apache License 2.0. The presence of this tool on a third-party hosting platform (Railway.app) does not constitute an endorsement of that platform by Contra Costa County.</p>
             </div>
         </div>
     </div>

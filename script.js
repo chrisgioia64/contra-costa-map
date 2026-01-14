@@ -1747,12 +1747,47 @@ function initInfoPanelToggle() {
 function initSourcesModal() {
     const modal = document.getElementById('sources-modal');
     const sourcesLink = document.getElementById('sources-link');
-    const closeBtn = document.querySelector('.modal-close');
+    const closeBtn = modal ? modal.querySelector('.modal-close') : null;
     
     if (!modal || !sourcesLink) return;
     
     // Open modal when Sources link is clicked
     sourcesLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.style.display = 'block';
+    });
+    
+    // Close modal when X is clicked
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+function initTermsModal() {
+    const modal = document.getElementById('terms-modal');
+    const termsLink = document.getElementById('terms-link');
+    const closeBtn = modal ? modal.querySelector('.modal-close') : null;
+    
+    if (!modal || !termsLink) return;
+    
+    // Open modal when Terms link is clicked
+    termsLink.addEventListener('click', function(e) {
         e.preventDefault();
         modal.style.display = 'block';
     });
@@ -1785,10 +1820,12 @@ if (document.readyState === 'loading') {
         loadData();
         initInfoPanelToggle();
         initSourcesModal();
+        initTermsModal();
     });
 } else {
     loadData();
     initInfoPanelToggle();
     initSourcesModal();
+    initTermsModal();
 }
 
