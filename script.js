@@ -530,7 +530,7 @@ function populateDataPanel(feature) {
         
         <div class="section-header">
             DEMOGRAPHIC (INDIVIDUALS)
-            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity. &quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
+            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity.\n&quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
         </div>
         
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
@@ -621,6 +621,9 @@ function updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent,
                     tooltip: {
                         enabled: true,
                         callbacks: {
+                            title: function() {
+                                return ''; // Remove title/heading
+                            },
                             label: function(context) {
                                 const label = context.label || '';
                                 const value = context.parsed || 0;
@@ -1469,7 +1472,7 @@ function populateCountyPanel() {
         
         <div class="section-header">
             DEMOGRAPHIC (INDIVIDUALS)
-            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity. &quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
+            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity.\n&quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
         </div>
         
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
