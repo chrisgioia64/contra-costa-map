@@ -77,7 +77,8 @@ const colorScale = {
     black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400'],  // Yellow -> light orange -> dark orange
     medical_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
     calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900'],  // Yellow -> light orange -> golden orange -> dark golden orange
-    renter: ['#fff9c4', '#fff59d', '#ffeb3b', '#e1bee7', '#ce93d8', '#ba68c8', '#9c27b0', '#7b1fa2']  // 3 yellow -> 2 intermediate -> 3 purple (8 colors)
+    renter: ['#fff9c4', '#fff59d', '#ffeb3b', '#e1bee7', '#ce93d8', '#ba68c8', '#9c27b0', '#7b1fa2'],  // 3 yellow -> 2 intermediate -> 3 purple (8 colors)
+    household_income: ['#d32f2f', '#f44336', '#ff7043', '#ffa726', '#ffcc02', '#c5e1a5', '#81c784', '#4caf50', '#2e7d32']  // Red -> orange -> yellow -> light green -> dark green (9 colors)
 };
 
 // Get value for a feature based on current metric (returns percentage)
@@ -203,6 +204,22 @@ function getFeatureValue(feature) {
         
         // Return the value if it's a valid number, otherwise null (No Data)
         return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'household_income') {
+        // Get Household Income directly from data (dollar amount)
+        let value = props['Household Income'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle commas, dollar signs, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/\$/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
     }
     return 0;
 }
@@ -244,8 +261,8 @@ function calculateBreaks(features) {
     if (values.length === 1) {
         // If only one value, create breaks around it
         breaks = [min, ...new Array(numColors - 1).fill(min), max];
-    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households' || currentMetric === 'renter') {
-        // Evenly spaced breaks for Medi-Cal, Cal Fresh, and Renter
+    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households' || currentMetric === 'renter' || currentMetric === 'household_income') {
+        // Evenly spaced breaks for Medi-Cal, Cal Fresh, Renter, and Household Income
         breaks = [min];
         const range = max - min;
         for (let i = 1; i < numColors; i++) {
@@ -393,6 +410,14 @@ function populateDataPanel(feature) {
         renterPercent = parseFloat(renterPercent) || null;
     }
     
+    // Get Household Income (dollar amount)
+    let householdIncome = props['Household Income'];
+    if (typeof householdIncome === 'string') {
+        householdIncome = parseFloat(householdIncome.replace(/\$/g, '').replace(/,/g, '')) || null;
+    } else if (householdIncome !== null && householdIncome !== undefined) {
+        householdIncome = parseFloat(householdIncome) || null;
+    }
+    
     // Get total population for percentage calculations
     let totalPop = props.Population || 0;
     if (typeof totalPop === 'string') {
@@ -521,6 +546,33 @@ function populateDataPanel(feature) {
         }
     }
     
+    // Helper function to create dollar amount bar chart HTML (for household income)
+    function createDollarBarChartHTML(label, value, barColor = '#4CAF50', maxValue = 250000) {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            // Round to nearest thousand
+            const roundedValue = Math.round(value / 1000) * 1000;
+            const formattedValue = '$' + roundedValue.toLocaleString();
+            // Normalize to percentage for bar width (based on maxValue)
+            const normalizedWidth = (value / maxValue) * 100;
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container" data-tooltip="${formattedValue}">
+                <div class="progress-bar" style="width: ${normalizedWidth || 0}%; background-color: ${barColor};">
+                    ${normalizedWidth >= 5 ? formattedValue : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
     // Build HTML
     let html = `
         <div class="data-item">
@@ -551,6 +603,7 @@ function populateDataPanel(feature) {
         ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
         ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
         ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
+        ${createDollarBarChartHTML('Household Income', householdIncome, '#4caf50')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -923,6 +976,9 @@ function updateLegend(breaks, colors) {
         case 'calfresh_households':
             metricLabel = 'Cal Fresh Households Percentage';
             break;
+        case 'household_income':
+            metricLabel = 'Household Income';
+            break;
         default:
             metricLabel = 'Percentage';
     }
@@ -937,20 +993,39 @@ function updateLegend(breaks, colors) {
         return Math.round(num) + '%';
     }
     
+    // Format dollar amount for legend (rounded to nearest thousand)
+    function formatDollarForLegend(num) {
+        if (num === null || num === undefined || isNaN(num)) return 'N/A';
+        const rounded = Math.round(num / 1000) * 1000;
+        return '$' + rounded.toLocaleString();
+    }
+    
     // Create legend items for each color step (breaks has 6 values: min, 20th, 40th, 60th, 80th, max)
     // We have 5 colors, so we create 5 ranges
     for (let i = colors.length - 1; i >= 0; i--) {
         const minValue = breaks[i];
         const maxValue = breaks[i + 1];
         
-        // Format the range label as percentage
+        // Format the range label
         let rangeLabel;
-        if (i === colors.length - 1) {
-            // Highest range: show "X%+"
-            rangeLabel = formatPercentForLegend(minValue).replace('%', '%+');
+        if (currentMetric === 'household_income') {
+            // Format as dollar amounts
+            if (i === colors.length - 1) {
+                // Highest range: show "$X+"
+                rangeLabel = formatDollarForLegend(minValue) + '+';
+            } else {
+                // Other ranges: show "$X - $Y"
+                rangeLabel = formatDollarForLegend(minValue) + ' - ' + formatDollarForLegend(maxValue);
+            }
         } else {
-            // Other ranges: show "X% - Y%"
-            rangeLabel = formatPercentForLegend(minValue) + ' - ' + formatPercentForLegend(maxValue);
+            // Format as percentage
+            if (i === colors.length - 1) {
+                // Highest range: show "X%+"
+                rangeLabel = formatPercentForLegend(minValue).replace('%', '%+');
+            } else {
+                // Other ranges: show "X% - Y%"
+                rangeLabel = formatPercentForLegend(minValue) + ' - ' + formatPercentForLegend(maxValue);
+            }
         }
         
         legendHTML += `
@@ -1439,6 +1514,7 @@ function populateCountyPanel() {
     let medicalPercent = countyData.percent_medical_households || null;
     let calfreshPercent = countyData.percent_calfresh_households || null;
     let renterPercent = countyData.percent_renter || null;
+    let householdIncome = countyData.household_income || null;
     
     // Helper function to create bar chart HTML with "No Data" handling
     function createBarChartHTML(label, value, barColor = '#4CAF50') {
@@ -1451,6 +1527,33 @@ function populateCountyPanel() {
             <div class="progress-bar-container" data-tooltip="${roundedPercent}%">
                 <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
                     ${value >= 5 ? formatPercent(value) : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
+    // Helper function to create dollar amount bar chart HTML (for household income)
+    function createDollarBarChartHTML(label, value, barColor = '#4CAF50', maxValue = 250000) {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            // Round to nearest thousand
+            const roundedValue = Math.round(value / 1000) * 1000;
+            const formattedValue = '$' + roundedValue.toLocaleString();
+            // Normalize to percentage for bar width (based on maxValue)
+            const normalizedWidth = (value / maxValue) * 100;
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container" data-tooltip="${formattedValue}">
+                <div class="progress-bar" style="width: ${normalizedWidth || 0}%; background-color: ${barColor};">
+                    ${normalizedWidth >= 5 ? formattedValue : ''}
                 </div>
             </div>
         </div>`;
@@ -1493,6 +1596,7 @@ function populateCountyPanel() {
         ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
         ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
         ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
+        ${createDollarBarChartHTML('Household Income', householdIncome, '#4caf50')}
     `;
     
     // Destroy existing pie chart before replacing HTML
