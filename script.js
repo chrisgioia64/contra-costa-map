@@ -1197,18 +1197,28 @@ function loadLayers() {
     console.log('cityData:', cityData ? (cityData.type || 'unknown') : 'undefined');
     console.log('cdpData:', cdpData ? (cdpData.type || 'unknown') : 'undefined');
     
-    // Remove existing layers
+    // Remove existing layers and reset references
     if (cityLayer) {
         map.removeLayer(cityLayer);
+        cityLayer = null;
     }
     if (cdpLayer) {
         map.removeLayer(cdpLayer);
+        cdpLayer = null;
     }
     if (cityLabelLayer) {
-        map.removeLayer(cityLabelLayer);
+        // Force removal - ensure it's removed even if there are timing issues
+        if (map.hasLayer(cityLabelLayer)) {
+            map.removeLayer(cityLabelLayer);
+        }
+        cityLabelLayer = null;
     }
     if (cdpLabelLayer) {
-        map.removeLayer(cdpLabelLayer);
+        // Force removal - ensure it's removed even if there are timing issues
+        if (map.hasLayer(cdpLabelLayer)) {
+            map.removeLayer(cdpLabelLayer);
+        }
+        cdpLabelLayer = null;
     }
     selectedLayer = null;
     
@@ -1296,17 +1306,27 @@ function loadLayers() {
     // Labels are created but visibility controlled by zoom level and checkbox state
     if (filteredCityFeatures.length > 0) {
         cityLabelLayer = createLabelLayer(filteredCityFeatures, true);
-        // Don't add to map immediately - let updateLabelVisibility() handle it based on zoom and checkbox
-        updateLabelVisibility();
         console.log('City label layer created');
+    } else {
+        cityLabelLayer = null;
     }
     
     if (filteredCdpFeatures.length > 0) {
         cdpLabelLayer = createLabelLayer(filteredCdpFeatures, false);
-        // Don't add to map immediately - let updateLabelVisibility() handle it based on zoom and checkbox
-        updateLabelVisibility();
         console.log('CDP label layer created');
+    } else {
+        cdpLabelLayer = null;
     }
+    
+    // Update label visibility once after both label layers are created (or set to null)
+    // This ensures consistent state and avoids race conditions
+    updateLabelVisibility();
+    
+    // Force a double-check after a short delay to ensure labels are properly managed
+    // This handles cases where loadLayers() is called during zoom animations
+    setTimeout(function() {
+        updateLabelVisibility();
+    }, 100);
     
     // Map bounds are already set to Walnut Creek 50-mile radius view
     // No need to override with feature bounds
@@ -1317,25 +1337,36 @@ function loadLayers() {
 
 // Update label visibility based on zoom level
 function updateLabelVisibility() {
-    const currentZoom = map.getZoom();
+    // Use Math.floor to get integer zoom level to avoid fractional zoom issues during animations
+    const currentZoom = Math.floor(map.getZoom());
     // Show labels at zoom 12+ (both mobile and desktop)
     const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
     
     if (cityLabelLayer) {
         // Only show city labels if zoom is sufficient AND checkbox is checked
-        if (shouldShowLabels && showCities && !map.hasLayer(cityLabelLayer)) {
-            cityLabelLayer.addTo(map);
-        } else if ((!shouldShowLabels || !showCities) && map.hasLayer(cityLabelLayer)) {
-            map.removeLayer(cityLabelLayer);
+        if (shouldShowLabels && showCities) {
+            if (!map.hasLayer(cityLabelLayer)) {
+                cityLabelLayer.addTo(map);
+            }
+        } else {
+            // Force removal - check multiple times to ensure it's removed
+            if (map.hasLayer(cityLabelLayer)) {
+                map.removeLayer(cityLabelLayer);
+            }
         }
     }
     
     if (cdpLabelLayer) {
         // Only show CDP labels if zoom is sufficient AND checkbox is checked
-        if (shouldShowLabels && showCDPs && !map.hasLayer(cdpLabelLayer)) {
-            cdpLabelLayer.addTo(map);
-        } else if ((!shouldShowLabels || !showCDPs) && map.hasLayer(cdpLabelLayer)) {
-            map.removeLayer(cdpLabelLayer);
+        if (shouldShowLabels && showCDPs) {
+            if (!map.hasLayer(cdpLabelLayer)) {
+                cdpLabelLayer.addTo(map);
+            }
+        } else {
+            // Force removal - check multiple times to ensure it's removed
+            if (map.hasLayer(cdpLabelLayer)) {
+                map.removeLayer(cdpLabelLayer);
+            }
         }
     }
 }
@@ -1343,6 +1374,48 @@ function updateLabelVisibility() {
 // Listen to zoom events to show/hide labels
 map.on('zoomend', function() {
     updateLabelVisibility();
+    // Double-check after a short delay to ensure layers are properly removed
+    // This handles cases where zoom animation might not complete immediately
+    // or when loadLayers() was called during a zoom operation
+    setTimeout(function() {
+        const currentZoom = Math.floor(map.getZoom());
+        const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
+        
+        // More aggressive removal - try to remove even if hasLayer check fails
+        if (cdpLabelLayer && (!shouldShowLabels || !showCDPs)) {
+            // Try removal multiple times to handle timing issues
+            try {
+                if (map.hasLayer(cdpLabelLayer)) {
+                    map.removeLayer(cdpLabelLayer);
+                }
+                // Force removal attempt even if hasLayer returns false (defensive)
+                setTimeout(function() {
+                    if (cdpLabelLayer && map.hasLayer(cdpLabelLayer)) {
+                        map.removeLayer(cdpLabelLayer);
+                    }
+                }, 50);
+            } catch (e) {
+                console.warn('Error removing CDP label layer:', e);
+            }
+        }
+        
+        if (cityLabelLayer && (!shouldShowLabels || !showCities)) {
+            // Try removal multiple times to handle timing issues
+            try {
+                if (map.hasLayer(cityLabelLayer)) {
+                    map.removeLayer(cityLabelLayer);
+                }
+                // Force removal attempt even if hasLayer returns false (defensive)
+                setTimeout(function() {
+                    if (cityLabelLayer && map.hasLayer(cityLabelLayer)) {
+                        map.removeLayer(cityLabelLayer);
+                    }
+                }, 50);
+            } catch (e) {
+                console.warn('Error removing city label layer:', e);
+            }
+        }
+    }, 100);
 });
 
 // Handle map clicks to deselect cities and show county data
