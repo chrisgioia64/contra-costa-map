@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medi-Cal vs Cal Fresh — Cities & CDPs</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.25rem;
+            margin: 0 0 8px 0;
+            color: #1b4f72;
+        }
+        p.sub {
+            margin: 0 0 16px 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        #chart-wrap {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 16px;
+            max-width: 920px;
+            height: 520px;
+            position: relative;
+        }
+        #stats {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Medi-Cal vs Cal Fresh (household %)</h1>
+    <p class="sub">Each point is a city or CDP in Contra Costa County. Dashed line: ordinary least squares fit across all plotted places.</p>
+    <div id="chart-wrap">
+        <canvas id="chart"></canvas>
+        <div id="stats"></div>
+    </div>
+
+    <script>
+        const MEDI = 'Medi-Cal Households';
+        const CALF = 'Cal Fresh Households';
+
+        function parsePct(v) {
+            if (v === null || v === undefined || v === '') return null;
+            const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/,/g, ''));
+            return Number.isFinite(n) ? n : null;
+        }
+
+        function cityName(props) {
+            return props.CDT_NAME_SHORT || props.CDTFA_CITY || props.CENSUS_PLACE_NAME || 'City';
+        }
+
+        function extractPoints(geojson, kind) {
+            const out = [];
+            for (const f of geojson.features || []) {
+                const p = f.properties || {};
+                const x = parsePct(p[MEDI]);
+                const y = parsePct(p[CALF]);
+                if (x === null || y === null) continue;
+                const label = kind === 'city' ? cityName(p) : (p.NAMELSAD || 'CDP');
+                out.push({ x, y, label, kind });
+            }
+            return out;
+        }
+
+        /** Ordinary least squares: y = slope * x + intercept */
+        function ols(points) {
+            const n = points.length;
+            if (n < 2) return null;
+            let sx = 0, sy = 0, sxy = 0, sxx = 0;
+            for (const { x, y } of points) {
+                sx += x;
+                sy += y;
+                sxy += x * y;
+                sxx += x * x;
+            }
+            const denom = n * sxx - sx * sx;
+            if (Math.abs(denom) < 1e-12) return null;
+            const slope = (n * sxy - sx * sy) / denom;
+            const intercept = (sy - slope * sx) / n;
+            return { slope, intercept, n };
+        }
+
+        async function main() {
+            const [citiesRes, cdpRes] = await Promise.all([
+                fetch('cities-final.json'),
+                fetch('cdp-final.json')
+            ]);
+            if (!citiesRes.ok) throw new Error('Could not load cities-final.json');
+            if (!cdpRes.ok) throw new Error('Could not load cdp-final.json');
+            const cities = await citiesRes.json();
+            const cdps = await cdpRes.json();
+
+            const cityPts = extractPoints(cities, 'city');
+            const cdpPts = extractPoints(cdps, 'cdp');
+            const all = cityPts.concat(cdpPts);
+
+            const fit = ols(all);
+            let lineData = [];
+            if (fit && all.length) {
+                const xs = all.map(p => p.x);
+                const xMin = Math.min(...xs);
+                const xMax = Math.max(...xs);
+                const pad = (xMax - xMin) * 0.02 || 1;
+                const lo = xMin - pad;
+                const hi = xMax + pad;
+                lineData = [
+                    { x: lo, y: fit.slope * lo + fit.intercept },
+                    { x: hi, y: fit.slope * hi + fit.intercept }
+                ];
+            }
+
+            const statsEl = document.getElementById('stats');
+            if (fit) {
+                statsEl.textContent =
+                    `OLS fit: y = ${fit.slope.toFixed(4)} × x + ${fit.intercept.toFixed(4)}  (${fit.n} places: ${cityPts.length} cities, ${cdpPts.length} CDPs).`;
+            } else {
+                statsEl.textContent = 'Not enough data for a regression line.';
+            }
+
+            const ctx = document.getElementById('chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Linear fit (OLS)',
+                            data: lineData,
+                            borderColor: '#333',
+                            borderWidth: 2,
+                            borderDash: [8, 6],
+                            pointRadius: 0,
+                            fill: false,
+                            order: -1,
+                            plugins: { tooltip: { enabled: false } }
+                        },
+                        {
+                            type: 'scatter',
+                            label: 'Cities',
+                            data: cityPts.map(({ x, y, label }) => ({ x, y, label })),
+                            backgroundColor: 'rgba(74, 144, 226, 0.75)',
+                            borderColor: 'rgba(40, 116, 166, 1)',
+                            borderWidth: 1,
+                            pointStyle: 'circle',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            order: 1
+                        },
+                        {
+                            type: 'scatter',
+                            label: 'CDPs',
+                            data: cdpPts.map(({ x, y, label }) => ({ x, y, label })),
+                            backgroundColor: 'rgba(46, 125, 50, 0.7)',
+                            borderColor: 'rgba(27, 94, 32, 1)',
+                            borderWidth: 1,
+                            pointStyle: 'circle',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label(ctx) {
+                                    const pt = ctx.raw;
+                                    const name = pt.label || '';
+                                    const x = typeof pt.x === 'number' ? pt.x.toFixed(2) : pt.x;
+                                    const y = typeof pt.y === 'number' ? pt.y.toFixed(2) : pt.y;
+                                    return name ? `${name}: Medi-Cal ${x}%, Cal Fresh ${y}%` : `Medi-Cal ${x}%, Cal Fresh ${y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Medi-Cal households (% of households)'
+                            },
+                            grace: '5%'
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Cal Fresh households (% of households)'
+                            },
+                            beginAtZero: true,
+                            grace: '5%'
+                        }
+                    }
+                }
+            });
+        }
+
+        main().catch(err => {
+            document.getElementById('stats').textContent = 'Error: ' + err.message;
+            console.error(err);
+        });
+    </script>
+</body>
+</html>
