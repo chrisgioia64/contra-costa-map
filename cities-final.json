@@ -3593,7 +3593,10 @@
         "Cal Fresh Households": 34.75,
         "Homeowner": 63.47,
         "Renter": 36.53,
-        "Household Income": 97465
+        "Household Income": 97465,
+        "ACS Medi-Cal Individual %": 27.89,
+        "Corrected Medi-Cal Individual %": 33.19,
+        "SNAP/CalFresh Household %": 13.52
       },
       "id": 13
     },
@@ -7033,7 +7036,10 @@
         "Cal Fresh Households": 12.86,
         "Homeowner": 81.96,
         "Renter": 18.04,
-        "Household Income": 142494
+        "Household Income": 142494,
+        "ACS Medi-Cal Individual %": 17.62,
+        "Corrected Medi-Cal Individual %": 20.97,
+        "SNAP/CalFresh Household %": 6.63
       },
       "id": 48
     },
@@ -9133,7 +9139,10 @@
         "Cal Fresh Households": 4.06,
         "Homeowner": 90.29,
         "Renter": 9.71,
-        "Household Income": 175707
+        "Household Income": 175707,
+        "ACS Medi-Cal Individual %": 5.74,
+        "Corrected Medi-Cal Individual %": 6.83,
+        "SNAP/CalFresh Household %": 1.79
       },
       "id": 78
     },
@@ -14867,7 +14876,10 @@
         "Cal Fresh Households": 14.94,
         "Homeowner": 61.37,
         "Renter": 38.63,
-        "Household Income": 108709
+        "Household Income": 108709,
+        "ACS Medi-Cal Individual %": 24.17,
+        "Corrected Medi-Cal Individual %": 28.76,
+        "SNAP/CalFresh Household %": 8.55
       },
       "id": 90
     },
@@ -21211,7 +21223,10 @@
         "Cal Fresh Households": 2.4,
         "Homeowner": 85.8,
         "Renter": 14.2,
-        "Household Income": 232216
+        "Household Income": 232216,
+        "ACS Medi-Cal Individual %": 3.03,
+        "Corrected Medi-Cal Individual %": 3.6,
+        "SNAP/CalFresh Household %": 0.71
       },
       "id": 106
     },
@@ -24559,7 +24574,10 @@
         "Cal Fresh Households": 8.57,
         "Homeowner": 57.3,
         "Renter": 42.7,
-        "Household Income": 127876
+        "Household Income": 127876,
+        "ACS Medi-Cal Individual %": 14.97,
+        "Corrected Medi-Cal Individual %": 17.81,
+        "SNAP/CalFresh Household %": 3.85
       },
       "id": 125
     },
@@ -33179,7 +33197,10 @@
         "Cal Fresh Households": 14.68,
         "Homeowner": 81.12,
         "Renter": 18.88,
-        "Household Income": 129397
+        "Household Income": 129397,
+        "ACS Medi-Cal Individual %": 14.78,
+        "Corrected Medi-Cal Individual %": 17.59,
+        "SNAP/CalFresh Household %": 6.67
       },
       "id": 175
     },
@@ -37515,7 +37536,10 @@
         "Cal Fresh Households": 3.17,
         "Homeowner": 77.26,
         "Renter": 22.74,
-        "Household Income": 228250
+        "Household Income": 228250,
+        "ACS Medi-Cal Individual %": 4.61,
+        "Corrected Medi-Cal Individual %": 5.48,
+        "SNAP/CalFresh Household %": 2.03
       },
       "id": 211
     },
@@ -48309,7 +48333,10 @@
         "Cal Fresh Households": 10.17,
         "Homeowner": 70.12,
         "Renter": 29.88,
-        "Household Income": 127355
+        "Household Income": 127355,
+        "ACS Medi-Cal Individual %": 11.55,
+        "Corrected Medi-Cal Individual %": 13.74,
+        "SNAP/CalFresh Household %": 5.38
       },
       "id": 252
     },
@@ -51349,7 +51376,10 @@
         "Cal Fresh Households": 3.21,
         "Homeowner": 84.33,
         "Renter": 15.67,
-        "Household Income": 216193
+        "Household Income": 216193,
+        "ACS Medi-Cal Individual %": 4.71,
+        "Corrected Medi-Cal Individual %": 5.6,
+        "SNAP/CalFresh Household %": 0.71
       },
       "id": 273
     },
@@ -54277,7 +54307,10 @@
         "Cal Fresh Households": 19.08,
         "Homeowner": 77.13,
         "Renter": 22.87,
-        "Household Income": 137677
+        "Household Income": 137677,
+        "ACS Medi-Cal Individual %": 18.02,
+        "Corrected Medi-Cal Individual %": 21.44,
+        "SNAP/CalFresh Household %": 8.86
       },
       "id": 293
     },
@@ -57941,7 +57974,10 @@
         "Cal Fresh Households": 4.27,
         "Homeowner": 92.16,
         "Renter": 7.84,
-        "Household Income": 250000
+        "Household Income": 250000,
+        "ACS Medi-Cal Individual %": 5.44,
+        "Corrected Medi-Cal Individual %": 6.48,
+        "SNAP/CalFresh Household %": 1.49
       },
       "id": 299
     },
@@ -66541,7 +66577,10 @@
         "Cal Fresh Households": 14.83,
         "Homeowner": 75.88,
         "Renter": 24.12,
-        "Household Income": 127717
+        "Household Income": 127717,
+        "ACS Medi-Cal Individual %": 17.85,
+        "Corrected Medi-Cal Individual %": 21.24,
+        "SNAP/CalFresh Household %": 7.4
       },
       "id": 320
     },
@@ -77411,7 +77450,10 @@
         "Cal Fresh Households": 28.4,
         "Homeowner": 61.04,
         "Renter": 38.96,
-        "Household Income": 99861
+        "Household Income": 99861,
+        "ACS Medi-Cal Individual %": 31.2,
+        "Corrected Medi-Cal Individual %": 37.12,
+        "SNAP/CalFresh Household %": 14.76
       },
       "id": 322
     },
@@ -83193,7 +83235,10 @@
         "Cal Fresh Households": 11.9,
         "Homeowner": 63.92,
         "Renter": 36.08,
-        "Household Income": 145029
+        "Household Income": 145029,
+        "ACS Medi-Cal Individual %": 9.56,
+        "Corrected Medi-Cal Individual %": 11.38,
+        "SNAP/CalFresh Household %": 3.62
       },
       "id": 325
     },
@@ -212355,7 +212400,10 @@
         "Cal Fresh Households": 26.35,
         "Homeowner": 52.52,
         "Renter": 47.48,
-        "Household Income": 95391
+        "Household Income": 95391,
+        "ACS Medi-Cal Individual %": 33.27,
+        "Corrected Medi-Cal Individual %": 39.6,
+        "SNAP/CalFresh Household %": 12.23
       },
       "id": 347
     },
@@ -215287,7 +215335,10 @@
         "Cal Fresh Households": 26.41,
         "Homeowner": 42.71,
         "Renter": 57.29,
-        "Household Income": 79478
+        "Household Income": 79478,
+        "ACS Medi-Cal Individual %": 39.3,
+        "Corrected Medi-Cal Individual %": 46.77,
+        "SNAP/CalFresh Household %": 17.19
       },
       "id": 383
     },
@@ -218531,7 +218582,10 @@
         "Cal Fresh Households": 5.4,
         "Homeowner": 70.51,
         "Renter": 29.49,
-        "Household Income": 196161
+        "Household Income": 196161,
+        "ACS Medi-Cal Individual %": 7.25,
+        "Corrected Medi-Cal Individual %": 8.62,
+        "SNAP/CalFresh Household %": 2.38
       },
       "id": 385
     },
@@ -231981,7 +232035,10 @@
         "Cal Fresh Households": 5.58,
         "Homeowner": 64.48,
         "Renter": 35.52,
-        "Household Income": 130432
+        "Household Income": 130432,
+        "ACS Medi-Cal Individual %": 9.89,
+        "Corrected Medi-Cal Individual %": 11.76,
+        "SNAP/CalFresh Household %": 2.77
       },
       "id": 456
     }

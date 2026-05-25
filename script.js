@@ -77,6 +77,8 @@ const colorScale = {
     black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400'],  // Yellow -> light orange -> dark orange
     medical_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
     calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900'],  // Yellow -> light orange -> golden orange -> dark golden orange
+    corrected_medi_cal_individuals: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
+    acs_snap_calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900'],  // Yellow -> light orange -> golden orange -> dark golden orange
     renter: ['#fff9c4', '#fff59d', '#ffeb3b', '#e1bee7', '#ce93d8', '#ba68c8', '#9c27b0', '#7b1fa2'],  // 3 yellow -> 2 intermediate -> 3 purple (8 colors)
     household_income: ['#d32f2f', '#f44336', '#ff7043', '#ffa726', '#ffcc02', '#c5e1a5', '#81c784', '#4caf50', '#2e7d32']  // Red -> orange -> yellow -> light green -> dark green (9 colors)
 };
@@ -188,6 +190,32 @@ function getFeatureValue(feature) {
         
         // Return the value if it's a valid number, otherwise null (No Data)
         return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'corrected_medi_cal_individuals') {
+        // Get corrected ACS Medi-Cal individual percentage directly from data
+        let value = props['Corrected Medi-Cal Individual %'];
+        
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'acs_snap_calfresh_households') {
+        // Get ACS SNAP/CalFresh household percentage directly from data
+        let value = props['SNAP/CalFresh Household %'];
+        
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
     } else if (currentMetric === 'renter') {
         // Get Renter percentage directly from data
         let value = props['Renter'];
@@ -261,8 +289,8 @@ function calculateBreaks(features) {
     if (values.length === 1) {
         // If only one value, create breaks around it
         breaks = [min, ...new Array(numColors - 1).fill(min), max];
-    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households' || currentMetric === 'renter' || currentMetric === 'household_income') {
-        // Evenly spaced breaks for Medi-Cal, Cal Fresh, Renter, and Household Income
+    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households' || currentMetric === 'corrected_medi_cal_individuals' || currentMetric === 'acs_snap_calfresh_households' || currentMetric === 'renter' || currentMetric === 'household_income') {
+        // Evenly spaced breaks for benefit, renter, and household income metrics
         breaks = [min];
         const range = max - min;
         for (let i = 1; i < numColors; i++) {
@@ -400,6 +428,21 @@ function populateDataPanel(feature) {
         calfreshPercent = parseFloat(calfreshPercent.replace(/%/g, '').replace(/,/g, '')) || null;
     } else if (calfreshPercent !== null && calfreshPercent !== undefined) {
         calfreshPercent = parseFloat(calfreshPercent) || null;
+    }
+    
+    // Get ACS benefit percentages
+    let correctedMedicalIndividualPercent = props['Corrected Medi-Cal Individual %'];
+    if (typeof correctedMedicalIndividualPercent === 'string') {
+        correctedMedicalIndividualPercent = parseFloat(correctedMedicalIndividualPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (correctedMedicalIndividualPercent !== null && correctedMedicalIndividualPercent !== undefined) {
+        correctedMedicalIndividualPercent = parseFloat(correctedMedicalIndividualPercent) || null;
+    }
+    
+    let acsSnapCalfreshPercent = props['SNAP/CalFresh Household %'];
+    if (typeof acsSnapCalfreshPercent === 'string') {
+        acsSnapCalfreshPercent = parseFloat(acsSnapCalfreshPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (acsSnapCalfreshPercent !== null && acsSnapCalfreshPercent !== undefined) {
+        acsSnapCalfreshPercent = parseFloat(acsSnapCalfreshPercent) || null;
     }
     
     // Get Renter percentage
@@ -604,6 +647,11 @@ function populateDataPanel(feature) {
         ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
         ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
         ${createDollarBarChartHTML('Household Income', householdIncome, '#4caf50')}
+        
+        <div class="section-header">ACS DATA</div>
+        
+        ${createBarChartHTML('Corrected Medi-Cal Individual %', correctedMedicalIndividualPercent, '#1b4f72')}
+        ${createBarChartHTML('SNAP/CalFresh Household %', acsSnapCalfreshPercent, '#E68900')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -975,6 +1023,12 @@ function updateLegend(breaks, colors) {
             break;
         case 'calfresh_households':
             metricLabel = 'Cal Fresh Households Percentage';
+            break;
+        case 'corrected_medi_cal_individuals':
+            metricLabel = 'Corrected Medi-Cal Individual Percentage';
+            break;
+        case 'acs_snap_calfresh_households':
+            metricLabel = 'SNAP/CalFresh Household Percentage';
             break;
         case 'household_income':
             metricLabel = 'Household Income';
