@@ -136,7 +136,7 @@ def convert_value(value):
     # Remove quotes and whitespace
     value = str(value).strip().strip('"').strip("'")
     
-    if value == '' or value.lower() == 'null':
+    if value == '' or value.lower() == 'null' or value.upper() == 'N/A':
         return None
     
     # Try to convert to number
@@ -203,7 +203,8 @@ def merge_demographics(geojson_data, demographics_dict):
             demo_fields = ['Households', 'Population', 'Latino', 'White', 'Black', 'Asian', 
                           ' Other ', 'Latino Percent', 'White Percent', 'Black Percent', 
                           'Asian Percent', 'Other Percent', 'Foreign Born - Total Pop', 
-                          'Native', 'Foreign', 'Foreign Born (%)']
+                          'Native', 'Foreign', 'Foreign Born (%)',
+                          'Medi-Cal Households', 'Cal Fresh Households']
             for field in demo_fields:
                 if field not in props:
                     props[field] = None

@@ -121,6 +121,87 @@
             font-size: 16px;
         }
         
+        #data-panel .section-header {
+            font-weight: bold;
+            color: #333;
+            font-size: 13px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        #data-panel .section-header:first-of-type {
+            margin-top: 10px;
+        }
+        
+        #data-panel .section-header .info-icon {
+            font-size: 14px;
+            cursor: help;
+            position: relative;
+            display: inline-block;
+        }
+        
+        #data-panel .section-header .info-icon::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            padding: 10px 12px;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: normal;
+            white-space: pre-line;
+            width: 220px;
+            max-width: 90vw;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+            line-height: 1.4;
+            text-align: left;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        #data-panel .section-header .info-icon::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 2px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+        }
+        
+        #data-panel .section-header .info-icon:hover::after,
+        #data-panel .section-header .info-icon:hover::before {
+            opacity: 1;
+        }
+        
+        /* Only show tooltip when data-tooltip attribute exists and is not empty */
+        #data-panel .section-header .info-icon:not([data-tooltip])::after,
+        #data-panel .section-header .info-icon:not([data-tooltip])::before,
+        #data-panel .section-header .info-icon[data-tooltip=""]::after,
+        #data-panel .section-header .info-icon[data-tooltip=""]::before {
+            display: none;
+        }
+        
         #data-panel .progress-bar-container {
             width: 100%;
             height: 30px;
@@ -128,7 +209,61 @@
             border-radius: 5px;
             margin-top: 8px;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            cursor: pointer;
+        }
+        
+        #data-panel .progress-bar-container::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+            display: block;
+        }
+        
+        #data-panel .progress-bar-container::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 2px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10000;
+            display: block;
+        }
+        
+        #data-panel .progress-bar-container[data-tooltip]:hover::after,
+        #data-panel .progress-bar-container[data-tooltip]:hover::before {
+            opacity: 1;
+        }
+        
+        /* Only show tooltip when data-tooltip attribute exists and is not empty */
+        #data-panel .progress-bar-container:not([data-tooltip])::after,
+        #data-panel .progress-bar-container:not([data-tooltip])::before,
+        #data-panel .progress-bar-container[data-tooltip=""]::after,
+        #data-panel .progress-bar-container[data-tooltip=""]::before {
+            display: none;
         }
         
         #data-panel .progress-bar {
@@ -182,6 +317,13 @@
             min-width: 180px;
         }
         
+        /* Position legend above info panel on desktop */
+        @media (min-width: 769px) {
+            .leaflet-bottom.leaflet-left {
+                margin-bottom: 160px; /* Space above info panel */
+            }
+        }
+        
         .legend-control h4 {
             margin: 0 0 10px 0;
             font-size: 14px;
@@ -209,6 +351,24 @@
         .legend-label {
             color: #333;
             font-size: 11px;
+        }
+        
+        /* Layer visibility control - below data panel on right */
+        .leaflet-control-container .leaflet-bottom.leaflet-left .layer-visibility-control {
+            position: fixed !important;
+            right: 0 !important;
+            width: fit-content !important;
+            min-width: auto !important;
+            margin: 0 !important;
+            pointer-events: auto !important;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* Ensure legend container stays on left side (not affected by layer visibility control) */
+        .leaflet-control-container .leaflet-bottom.leaflet-left .legend-control {
+            position: relative !important;
+            right: auto !important;
+            left: 0 !important;
         }
         
         /* City label styles - larger for cities */
@@ -293,6 +453,88 @@
         /* Hide toggle button on desktop */
         #info-panel .info-toggle {
             display: none;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .modal-content h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .modal-body {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .modal-body p {
+            margin: 10px 0;
+        }
+        
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            cursor: pointer;
+        }
+        
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        #sources-link, #terms-link {
+            cursor: pointer;
+        }
+        
+        #sources-link:hover, #terms-link:hover {
+            text-decoration: underline;
+        }
+        
+        #info-panel a[href*="github.com"] {
+            transition: opacity 0.2s ease;
+        }
+        
+        #info-panel a[href*="github.com"]:hover {
+            opacity: 0.7;
+        }
+        
+        #info-panel a[href*="github.com"] svg {
+            transition: transform 0.2s ease;
+        }
+        
+        #info-panel a[href*="github.com"]:hover svg {
+            transform: scale(1.1);
         }
         
         /* Mobile responsive styles */
@@ -514,11 +756,23 @@
         <div id="controls">
             <label for="metric-select">Data By:</label>
             <select id="metric-select">
-                <option value="white_percent">% White</option>
-                <option value="hispanic_percent">% Latino</option>
-                <option value="asian_percent">% Asian</option>
-                <option value="black_percent">% Black</option>
-                <option value="foreign_born">% Foreign Born</option>
+                <optgroup label="DEMOGRAPHIC (INDIVIDUALS)">
+                    <option value="white_percent">% White</option>
+                    <option value="hispanic_percent">% Latino</option>
+                    <option value="asian_percent">% Asian</option>
+                    <option value="black_percent">% Black</option>
+                    <option value="foreign_born">% Foreign Born</option>
+                </optgroup>
+                <optgroup label="ECONOMIC (HOUSEHOLDS)">
+                    <option value="medical_households">% Medi-Cal</option>
+                    <option value="calfresh_households">% Cal Fresh</option>
+                    <option value="renter">% Renter</option>
+                    <option value="household_income">Household Income</option>
+                </optgroup>
+                <optgroup label="ACS DATA">
+                    <option value="corrected_medi_cal_individuals">Corrected Medi-Cal Individual %</option>
+                    <option value="acs_snap_calfresh_households">SNAP/CalFresh Household %</option>
+                </optgroup>
             </select>
         </div>
     
@@ -527,10 +781,53 @@
         <div class="info-content">
             <h1>CocoMap</h1>
             <div class="subtitle">Contra Costa County Demographic Map</div>
-            <div class="source-label">Source: <span class="source-value">Census 2020</span></div>
-            <div class="source-label" style="margin-top: 5px;">Maintained by Office of John Gioia | <a href="mailto:john_gioia@bos.cccounty.us" style="color: #0066cc; text-decoration: underline;">Email Us</a></div>
-            <div style="margin-top: 10px;">
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSc-VYoZJXmhflZHUfMFfjX4wGE149Z7efOyahzjg60tupLWCA/viewform?usp=sf_link" target="_blank" style="color: #0066cc; text-decoration: underline;">Take the trivia quiz</a>
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                <a href="#" id="sources-link" style="color: #0066cc; text-decoration: underline; font-size: 11px;">Sources</a>
+                <a href="#" id="terms-link" style="color: #0066cc; text-decoration: underline; font-size: 11px;">Terms</a>
+                <a href="https://github.com/chrisgioia64/contra-costa-map/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; text-decoration: none;">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="color: #333;">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sources Modal -->
+    <div id="sources-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>Data Sources</h2>
+            <div class="modal-body">
+                <p><strong>Population by Race/Ethnicity</strong> – 2020-2024 American Community Survey 5-Year Estimates</p>
+                <p><strong>Foreign Born</strong> - 2020-2024 American Community Survey 5-Year Estimates</p>
+                <p><strong>Medi-Cal/Cal Fresh</strong> - November 2025 - EHSD (Contra Costa County - Employment and Human Services) </p>
+                <p><strong>ACS Medi-Cal/SNAP</strong> - 2019-2023 American Community Survey 5-Year Estimates; corrected Medi-Cal applies a 1.19 undercount factor</p>
+                <p><strong>Housing: Renter</strong> - 2019-2023 American Community Survey 5-Year Estimates</p>
+                <p><strong>Median Household Income</strong> - 2020-2024 American Community Survey 5-Year Estimates</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="modal-close">&times;</span>
+            <h2>Terms of Use</h2>
+            <div class="modal-body">
+                <p><strong>1. "As-Is" Information</strong></p>
+                <p>This application is provided for informational and community outreach purposes only. While we strive to present data accurately, the software and the information within it are provided on an "as-is" and "as-available" basis. The developer makes no representations or warranties of any kind, express or implied, regarding the completeness, accuracy, reliability, or suitability of the data map.</p>
+                
+                <p><strong>2. Source of Truth</strong></p>
+                <p>The data displayed in this application is sourced directly from the Contra Costa County Employment & Human Services Department (EHSD) and the US Census data.</p>
+                <p><strong>Translation Risk:</strong> This application acts as a visualization tool; errors may occur during the automated processing or rendering of raw data.</p>
+                <p><strong>Verification:</strong> Users should not rely solely on this map for legal, financial, or eligibility decisions.</p>
+                
+                <p><strong>3. Limitation of Liability</strong></p>
+                <p>In no event shall the volunteer developers, the Office of Supervisor John Gioia, or Contra Costa County be liable for any loss or damage—including without limitation, indirect or consequential loss or damage—arising from the use of, or reliance on, the information presented in this application.</p>
+                
+                <p><strong>4. Technical Maintenance</strong></p>
+                <p>This tool is maintained by private volunteers. Technical functionality is governed by the Apache License 2.0. The presence of this tool on a third-party hosting platform (Railway.app) does not constitute an endorsement of that platform by Contra Costa County.</p>
             </div>
         </div>
     </div>

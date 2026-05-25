@@ -74,7 +74,13 @@ const colorScale = {
     white_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> green -> blue (7 colors)
     hispanic_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#f8c471', '#ff8a65', '#ff5722', '#e74c3c', '#a50f15'],  // Yellow -> orange -> dark red
     asian_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#d7bde2', '#ce93d8', '#ba68c8', '#9c27b0', '#805ad5'],  // Yellow -> light purple -> purple
-    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400']  // Yellow -> light orange -> dark orange
+    black_percent: ['#fff9c4', '#fff59d', '#ffeb3b', '#fad7a0', '#ffb74d', '#ff9800', '#ff6f00', '#cc4400'],  // Yellow -> light orange -> dark orange
+    medical_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
+    calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900'],  // Yellow -> light orange -> golden orange -> dark golden orange
+    corrected_medi_cal_individuals: ['#fff9c4', '#fff59d', '#ffeb3b', '#c8e6c9', '#a5d6a7', '#81c784', '#66bb6a', '#2874a6', '#1b4f72'],  // Yellow -> light green -> blue -> dark blue
+    acs_snap_calfresh_households: ['#fff9c4', '#fff59d', '#ffeb3b', '#ffe082', '#ffcc02', '#ffb300', '#F9A625', '#E68900'],  // Yellow -> light orange -> golden orange -> dark golden orange
+    renter: ['#fff9c4', '#fff59d', '#ffeb3b', '#e1bee7', '#ce93d8', '#ba68c8', '#9c27b0', '#7b1fa2'],  // 3 yellow -> 2 intermediate -> 3 purple (8 colors)
+    household_income: ['#d32f2f', '#f44336', '#ff7043', '#ffa726', '#ffcc02', '#c5e1a5', '#81c784', '#4caf50', '#2e7d32']  // Red -> orange -> yellow -> light green -> dark green (9 colors)
 };
 
 // Get value for a feature based on current metric (returns percentage)
@@ -152,6 +158,96 @@ function getFeatureValue(feature) {
             return (black / totalPop) * 100;
         }
         return 0;
+    } else if (currentMetric === 'medical_households') {
+        // Get Medi-Cal Households percentage directly from data
+        let value = props['Medi-Cal Households'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle %, commas, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'calfresh_households') {
+        // Get Cal Fresh Households percentage directly from data
+        let value = props['Cal Fresh Households'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle %, commas, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'corrected_medi_cal_individuals') {
+        // Get corrected ACS Medi-Cal individual percentage directly from data
+        let value = props['Corrected Medi-Cal Individual %'];
+        
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'acs_snap_calfresh_households') {
+        // Get ACS SNAP/CalFresh household percentage directly from data
+        let value = props['SNAP/CalFresh Household %'];
+        
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'renter') {
+        // Get Renter percentage directly from data
+        let value = props['Renter'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle %, commas, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/%/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
+    } else if (currentMetric === 'household_income') {
+        // Get Household Income directly from data (dollar amount)
+        let value = props['Household Income'];
+        
+        // If value is null/undefined, return null (No Data)
+        if (value === null || value === undefined) {
+            return null;
+        }
+        
+        // Parse the value if it's a string (handle commas, dollar signs, etc.)
+        if (typeof value === 'string') {
+            value = parseFloat(value.replace(/\$/g, '').replace(/,/g, ''));
+        }
+        
+        // Return the value if it's a valid number, otherwise null (No Data)
+        return value !== null && !isNaN(value) && value !== '' ? value : null;
     }
     return 0;
 }
@@ -172,7 +268,7 @@ function calculateBreaks(features) {
         const sampleFeature = features[0];
         const sampleValue = getFeatureValue(sampleFeature);
         console.log(`Sample feature (${currentMetric}):`, sampleFeature.properties.CDTFA_CITY || sampleFeature.properties.NAMELSAD);
-        console.log(`Sample percentage value: ${sampleValue.toFixed(1)}%`);
+        console.log(`Sample percentage value: ${sampleValue !== null && !isNaN(sampleValue) ? sampleValue.toFixed(1) + '%' : 'No Data'}`);
     }
     
     console.log(`Found ${values.length} valid percentage values (including zeros) out of ${features.length} features`);
@@ -188,13 +284,21 @@ function calculateBreaks(features) {
     const min = values[0];
     const max = values[values.length - 1];
     
-    // Use quantile breaks (dynamic based on number of colors)
-    // Ensure we have at least 2 values for proper breaks
+    // Use evenly spaced breaks for medical_households, quantile breaks for others
     let breaks;
     if (values.length === 1) {
         // If only one value, create breaks around it
         breaks = [min, ...new Array(numColors - 1).fill(min), max];
+    } else if (currentMetric === 'medical_households' || currentMetric === 'calfresh_households' || currentMetric === 'corrected_medi_cal_individuals' || currentMetric === 'acs_snap_calfresh_households' || currentMetric === 'renter' || currentMetric === 'household_income') {
+        // Evenly spaced breaks for benefit, renter, and household income metrics
+        breaks = [min];
+        const range = max - min;
+        for (let i = 1; i < numColors; i++) {
+            breaks.push(min + (range * i / numColors));
+        }
+        breaks.push(max);
     } else {
+        // Use quantile breaks (dynamic based on number of colors)
         breaks = [min];
         for (let i = 1; i < numColors; i++) {
             breaks.push(values[Math.max(0, Math.floor(values.length * (i / numColors)))]);
@@ -310,6 +414,53 @@ function populateDataPanel(feature) {
         foreignBornPercent = parseFloat(foreignBornPercent.replace(/%/g, '').replace(/,/g, '')) || null;
     }
     
+    // Get Medi-Cal Households percentage
+    let medicalPercent = props['Medi-Cal Households'];
+    if (typeof medicalPercent === 'string') {
+        medicalPercent = parseFloat(medicalPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (medicalPercent !== null && medicalPercent !== undefined) {
+        medicalPercent = parseFloat(medicalPercent) || null;
+    }
+    
+    // Get Cal Fresh Households percentage
+    let calfreshPercent = props['Cal Fresh Households'];
+    if (typeof calfreshPercent === 'string') {
+        calfreshPercent = parseFloat(calfreshPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (calfreshPercent !== null && calfreshPercent !== undefined) {
+        calfreshPercent = parseFloat(calfreshPercent) || null;
+    }
+    
+    // Get ACS benefit percentages
+    let correctedMedicalIndividualPercent = props['Corrected Medi-Cal Individual %'];
+    if (typeof correctedMedicalIndividualPercent === 'string') {
+        correctedMedicalIndividualPercent = parseFloat(correctedMedicalIndividualPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (correctedMedicalIndividualPercent !== null && correctedMedicalIndividualPercent !== undefined) {
+        correctedMedicalIndividualPercent = parseFloat(correctedMedicalIndividualPercent) || null;
+    }
+    
+    let acsSnapCalfreshPercent = props['SNAP/CalFresh Household %'];
+    if (typeof acsSnapCalfreshPercent === 'string') {
+        acsSnapCalfreshPercent = parseFloat(acsSnapCalfreshPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (acsSnapCalfreshPercent !== null && acsSnapCalfreshPercent !== undefined) {
+        acsSnapCalfreshPercent = parseFloat(acsSnapCalfreshPercent) || null;
+    }
+    
+    // Get Renter percentage
+    let renterPercent = props['Renter'];
+    if (typeof renterPercent === 'string') {
+        renterPercent = parseFloat(renterPercent.replace(/%/g, '').replace(/,/g, '')) || null;
+    } else if (renterPercent !== null && renterPercent !== undefined) {
+        renterPercent = parseFloat(renterPercent) || null;
+    }
+    
+    // Get Household Income (dollar amount)
+    let householdIncome = props['Household Income'];
+    if (typeof householdIncome === 'string') {
+        householdIncome = parseFloat(householdIncome.replace(/\$/g, '').replace(/,/g, '')) || null;
+    } else if (householdIncome !== null && householdIncome !== undefined) {
+        householdIncome = parseFloat(householdIncome) || null;
+    }
+    
     // Get total population for percentage calculations
     let totalPop = props.Population || 0;
     if (typeof totalPop === 'string') {
@@ -415,6 +566,56 @@ function populateDataPanel(feature) {
         }
     }
     
+    // Helper function to create bar chart HTML with "No Data" handling
+    function createBarChartHTML(label, value, barColor = '#4CAF50') {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            const roundedPercent = Math.round(value);
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container" data-tooltip="${roundedPercent}%">
+                <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
+                    ${value >= 5 ? formatPercent(value) : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
+    // Helper function to create dollar amount bar chart HTML (for household income)
+    function createDollarBarChartHTML(label, value, barColor = '#4CAF50', maxValue = 250000) {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            // Round to nearest thousand
+            const roundedValue = Math.round(value / 1000) * 1000;
+            const formattedValue = '$' + roundedValue.toLocaleString();
+            // Normalize to percentage for bar width (based on maxValue)
+            const normalizedWidth = (value / maxValue) * 100;
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container" data-tooltip="${formattedValue}">
+                <div class="progress-bar" style="width: ${normalizedWidth || 0}%; background-color: ${barColor};">
+                    ${normalizedWidth >= 5 ? formattedValue : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
     // Build HTML
     let html = `
         <div class="data-item">
@@ -422,18 +623,35 @@ function populateDataPanel(feature) {
             <div class="data-value">${formatNumber(totalPop)}</div>
         </div>
         
+        <div class="section-header">
+            DEMOGRAPHIC (INDIVIDUALS)
+            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity.\n&quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
+        </div>
+        
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
             <canvas id="pie-chart-inline"></canvas>
         </div>
         
         <div class="data-item">
-            <div class="data-label">Foreign Born Population:</div>
-            <div class="progress-bar-container">
+            <div class="data-label">Foreign Born:</div>
+            <div class="progress-bar-container" data-tooltip="${foreignBornPercent != null ? Math.round(foreignBornPercent) + '%' : '0%'}">
                 <div class="progress-bar" style="width: ${foreignBornPercent || 0}%;">
                     ${foreignBornPercent != null && foreignBornPercent >= 5 ? formatPercent(foreignBornPercent) : ''}
                 </div>
             </div>
         </div>
+        
+        <div class="section-header">ECONOMIC (HOUSEHOLDS)</div>
+        
+        ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
+        ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
+        ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
+        ${createDollarBarChartHTML('Household Income', householdIncome, '#4caf50')}
+        
+        <div class="section-header">ACS DATA</div>
+        
+        ${createBarChartHTML('Corrected Medi-Cal Individual %', correctedMedicalIndividualPercent, '#1b4f72')}
+        ${createBarChartHTML('SNAP/CalFresh Household %', acsSnapCalfreshPercent, '#E68900')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -449,6 +667,8 @@ function populateDataPanel(feature) {
     // Update pie chart (use setTimeout to ensure DOM is updated)
     setTimeout(() => {
         updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent);
+        // Update layer visibility position after pie chart renders
+        setTimeout(updateLayerVisibilityPosition, 50);
     }, 10);
 }
 
@@ -502,6 +722,9 @@ function updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent,
                     tooltip: {
                         enabled: true,
                         callbacks: {
+                            title: function() {
+                                return ''; // Remove title/heading
+                            },
                             label: function(context) {
                                 const label = context.label || '';
                                 const value = context.parsed || 0;
@@ -795,6 +1018,21 @@ function updateLegend(breaks, colors) {
         case 'black_percent':
             metricLabel = 'Black Percentage';
             break;
+        case 'medical_households':
+            metricLabel = 'Medi-Cal Households Percentage';
+            break;
+        case 'calfresh_households':
+            metricLabel = 'Cal Fresh Households Percentage';
+            break;
+        case 'corrected_medi_cal_individuals':
+            metricLabel = 'Corrected Medi-Cal Individual Percentage';
+            break;
+        case 'acs_snap_calfresh_households':
+            metricLabel = 'SNAP/CalFresh Household Percentage';
+            break;
+        case 'household_income':
+            metricLabel = 'Household Income';
+            break;
         default:
             metricLabel = 'Percentage';
     }
@@ -809,20 +1047,39 @@ function updateLegend(breaks, colors) {
         return Math.round(num) + '%';
     }
     
+    // Format dollar amount for legend (rounded to nearest thousand)
+    function formatDollarForLegend(num) {
+        if (num === null || num === undefined || isNaN(num)) return 'N/A';
+        const rounded = Math.round(num / 1000) * 1000;
+        return '$' + rounded.toLocaleString();
+    }
+    
     // Create legend items for each color step (breaks has 6 values: min, 20th, 40th, 60th, 80th, max)
     // We have 5 colors, so we create 5 ranges
     for (let i = colors.length - 1; i >= 0; i--) {
         const minValue = breaks[i];
         const maxValue = breaks[i + 1];
         
-        // Format the range label as percentage
+        // Format the range label
         let rangeLabel;
-        if (i === colors.length - 1) {
-            // Highest range: show "X%+"
-            rangeLabel = formatPercentForLegend(minValue).replace('%', '%+');
+        if (currentMetric === 'household_income') {
+            // Format as dollar amounts
+            if (i === colors.length - 1) {
+                // Highest range: show "$X+"
+                rangeLabel = formatDollarForLegend(minValue) + '+';
+            } else {
+                // Other ranges: show "$X - $Y"
+                rangeLabel = formatDollarForLegend(minValue) + ' - ' + formatDollarForLegend(maxValue);
+            }
         } else {
-            // Other ranges: show "X% - Y%"
-            rangeLabel = formatPercentForLegend(minValue) + ' - ' + formatPercentForLegend(maxValue);
+            // Format as percentage
+            if (i === colors.length - 1) {
+                // Highest range: show "X%+"
+                rangeLabel = formatPercentForLegend(minValue).replace('%', '%+');
+            } else {
+                // Other ranges: show "X% - Y%"
+                rangeLabel = formatPercentForLegend(minValue) + ' - ' + formatPercentForLegend(maxValue);
+            }
         }
         
         legendHTML += `
@@ -841,7 +1098,7 @@ function updateLegend(breaks, colors) {
     </div>`;
     
     // Create and add legend control
-    const legendPosition = window.innerWidth <= 768 ? 'bottomleft' : 'bottomright';
+    const legendPosition = window.innerWidth <= 768 ? 'bottomleft' : 'bottomleft';
     legendControl = L.control({ position: legendPosition });
     legendControl.onAdd = function() {
         const div = L.DomUtil.create('div', 'legend-control');
@@ -890,8 +1147,8 @@ function createLayerVisibilityControl() {
         map.removeControl(layerVisibilityControl);
     }
     
-    // Create custom control
-    layerVisibilityControl = L.control({ position: 'bottomright' });
+    // Create custom control - positioned at bottomleft but will be centered with CSS
+    layerVisibilityControl = L.control({ position: 'bottomleft' });
     layerVisibilityControl.onAdd = function() {
         const div = L.DomUtil.create('div', 'layer-visibility-control');
         div.innerHTML = `
@@ -946,6 +1203,9 @@ function createLayerVisibilityControl() {
     };
     layerVisibilityControl.addTo(map);
     
+    // Update layer visibility control position based on data panel height
+    updateLayerVisibilityPosition();
+    
     // Add zoom control last (at bottom) to ensure proper stacking: legend -> checkboxes -> zoom
     if (!zoomControl) {
         zoomControl = L.control.zoom({
@@ -991,18 +1251,28 @@ function loadLayers() {
     console.log('cityData:', cityData ? (cityData.type || 'unknown') : 'undefined');
     console.log('cdpData:', cdpData ? (cdpData.type || 'unknown') : 'undefined');
     
-    // Remove existing layers
+    // Remove existing layers and reset references
     if (cityLayer) {
         map.removeLayer(cityLayer);
+        cityLayer = null;
     }
     if (cdpLayer) {
         map.removeLayer(cdpLayer);
+        cdpLayer = null;
     }
     if (cityLabelLayer) {
-        map.removeLayer(cityLabelLayer);
+        // Force removal - ensure it's removed even if there are timing issues
+        if (map.hasLayer(cityLabelLayer)) {
+            map.removeLayer(cityLabelLayer);
+        }
+        cityLabelLayer = null;
     }
     if (cdpLabelLayer) {
-        map.removeLayer(cdpLabelLayer);
+        // Force removal - ensure it's removed even if there are timing issues
+        if (map.hasLayer(cdpLabelLayer)) {
+            map.removeLayer(cdpLabelLayer);
+        }
+        cdpLabelLayer = null;
     }
     selectedLayer = null;
     
@@ -1090,17 +1360,27 @@ function loadLayers() {
     // Labels are created but visibility controlled by zoom level and checkbox state
     if (filteredCityFeatures.length > 0) {
         cityLabelLayer = createLabelLayer(filteredCityFeatures, true);
-        // Don't add to map immediately - let updateLabelVisibility() handle it based on zoom and checkbox
-        updateLabelVisibility();
         console.log('City label layer created');
+    } else {
+        cityLabelLayer = null;
     }
     
     if (filteredCdpFeatures.length > 0) {
         cdpLabelLayer = createLabelLayer(filteredCdpFeatures, false);
-        // Don't add to map immediately - let updateLabelVisibility() handle it based on zoom and checkbox
-        updateLabelVisibility();
         console.log('CDP label layer created');
+    } else {
+        cdpLabelLayer = null;
     }
+    
+    // Update label visibility once after both label layers are created (or set to null)
+    // This ensures consistent state and avoids race conditions
+    updateLabelVisibility();
+    
+    // Force a double-check after a short delay to ensure labels are properly managed
+    // This handles cases where loadLayers() is called during zoom animations
+    setTimeout(function() {
+        updateLabelVisibility();
+    }, 100);
     
     // Map bounds are already set to Walnut Creek 50-mile radius view
     // No need to override with feature bounds
@@ -1111,25 +1391,36 @@ function loadLayers() {
 
 // Update label visibility based on zoom level
 function updateLabelVisibility() {
-    const currentZoom = map.getZoom();
+    // Use Math.floor to get integer zoom level to avoid fractional zoom issues during animations
+    const currentZoom = Math.floor(map.getZoom());
     // Show labels at zoom 12+ (both mobile and desktop)
     const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
     
     if (cityLabelLayer) {
         // Only show city labels if zoom is sufficient AND checkbox is checked
-        if (shouldShowLabels && showCities && !map.hasLayer(cityLabelLayer)) {
-            cityLabelLayer.addTo(map);
-        } else if ((!shouldShowLabels || !showCities) && map.hasLayer(cityLabelLayer)) {
-            map.removeLayer(cityLabelLayer);
+        if (shouldShowLabels && showCities) {
+            if (!map.hasLayer(cityLabelLayer)) {
+                cityLabelLayer.addTo(map);
+            }
+        } else {
+            // Force removal - check multiple times to ensure it's removed
+            if (map.hasLayer(cityLabelLayer)) {
+                map.removeLayer(cityLabelLayer);
+            }
         }
     }
     
     if (cdpLabelLayer) {
         // Only show CDP labels if zoom is sufficient AND checkbox is checked
-        if (shouldShowLabels && showCDPs && !map.hasLayer(cdpLabelLayer)) {
-            cdpLabelLayer.addTo(map);
-        } else if ((!shouldShowLabels || !showCDPs) && map.hasLayer(cdpLabelLayer)) {
-            map.removeLayer(cdpLabelLayer);
+        if (shouldShowLabels && showCDPs) {
+            if (!map.hasLayer(cdpLabelLayer)) {
+                cdpLabelLayer.addTo(map);
+            }
+        } else {
+            // Force removal - check multiple times to ensure it's removed
+            if (map.hasLayer(cdpLabelLayer)) {
+                map.removeLayer(cdpLabelLayer);
+            }
         }
     }
 }
@@ -1137,6 +1428,48 @@ function updateLabelVisibility() {
 // Listen to zoom events to show/hide labels
 map.on('zoomend', function() {
     updateLabelVisibility();
+    // Double-check after a short delay to ensure layers are properly removed
+    // This handles cases where zoom animation might not complete immediately
+    // or when loadLayers() was called during a zoom operation
+    setTimeout(function() {
+        const currentZoom = Math.floor(map.getZoom());
+        const shouldShowLabels = currentZoom >= MIN_ZOOM_FOR_LABELS;
+        
+        // More aggressive removal - try to remove even if hasLayer check fails
+        if (cdpLabelLayer && (!shouldShowLabels || !showCDPs)) {
+            // Try removal multiple times to handle timing issues
+            try {
+                if (map.hasLayer(cdpLabelLayer)) {
+                    map.removeLayer(cdpLabelLayer);
+                }
+                // Force removal attempt even if hasLayer returns false (defensive)
+                setTimeout(function() {
+                    if (cdpLabelLayer && map.hasLayer(cdpLabelLayer)) {
+                        map.removeLayer(cdpLabelLayer);
+                    }
+                }, 50);
+            } catch (e) {
+                console.warn('Error removing CDP label layer:', e);
+            }
+        }
+        
+        if (cityLabelLayer && (!shouldShowLabels || !showCities)) {
+            // Try removal multiple times to handle timing issues
+            try {
+                if (map.hasLayer(cityLabelLayer)) {
+                    map.removeLayer(cityLabelLayer);
+                }
+                // Force removal attempt even if hasLayer returns false (defensive)
+                setTimeout(function() {
+                    if (cityLabelLayer && map.hasLayer(cityLabelLayer)) {
+                        map.removeLayer(cityLabelLayer);
+                    }
+                }, 50);
+            } catch (e) {
+                console.warn('Error removing city label layer:', e);
+            }
+        }
+    }, 100);
 });
 
 // Handle map clicks to deselect cities and show county data
@@ -1304,6 +1637,62 @@ function populateCountyPanel() {
     const asianPercent = countyData.percent_asian || 0;
     const otherPercent = 100 - (whitePercent + latinoPercent + blackPercent + asianPercent);
     
+    // Get Medi-Cal, Cal Fresh, and Renter data from county data
+    let medicalPercent = countyData.percent_medical_households || null;
+    let calfreshPercent = countyData.percent_calfresh_households || null;
+    let renterPercent = countyData.percent_renter || null;
+    let householdIncome = countyData.household_income || null;
+    
+    // Helper function to create bar chart HTML with "No Data" handling
+    function createBarChartHTML(label, value, barColor = '#4CAF50') {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            const roundedPercent = Math.round(value);
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container" data-tooltip="${roundedPercent}%">
+                <div class="progress-bar" style="width: ${value || 0}%; background-color: ${barColor};">
+                    ${value >= 5 ? formatPercent(value) : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
+    // Helper function to create dollar amount bar chart HTML (for household income)
+    function createDollarBarChartHTML(label, value, barColor = '#4CAF50', maxValue = 250000) {
+        const hasData = value !== null && value !== undefined && !isNaN(value);
+        if (hasData) {
+            // Round to nearest thousand
+            const roundedValue = Math.round(value / 1000) * 1000;
+            const formattedValue = '$' + roundedValue.toLocaleString();
+            // Normalize to percentage for bar width (based on maxValue)
+            const normalizedWidth = (value / maxValue) * 100;
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div class="progress-bar-container" data-tooltip="${formattedValue}">
+                <div class="progress-bar" style="width: ${normalizedWidth || 0}%; background-color: ${barColor};">
+                    ${normalizedWidth >= 5 ? formattedValue : ''}
+                </div>
+            </div>
+        </div>`;
+        } else {
+            return `
+        <div class="data-item">
+            <div class="data-label">${label}:</div>
+            <div style="margin-top: 8px; color: #666; font-style: italic;">No Data</div>
+        </div>`;
+        }
+    }
+    
     // Build HTML
     let html = `
         <div class="data-item">
@@ -1311,18 +1700,30 @@ function populateCountyPanel() {
             <div class="data-value">${formatNumber(countyData.population)}</div>
         </div>
         
+        <div class="section-header">
+            DEMOGRAPHIC (INDIVIDUALS)
+            <span class="info-icon" data-tooltip="According to the Census data (table id: B03002), &quot;Other&quot; includes American Indian and Alaska Native alone, Native Hawaiian and Other Pacific Islander alone, some other race alone, and Two or more Races from the Not Hispanic Latino ethnicity.\n&quot;Latino&quot; includes all races under &quot;Hispanic or Latino&quot; category.">ℹ️</span>
+        </div>
+        
         <div id="pie-chart-container-inline" style="display: block; margin-top: 15px; margin-bottom: 15px; height: 250px; position: relative;">
             <canvas id="pie-chart-inline"></canvas>
         </div>
         
         <div class="data-item">
-            <div class="data-label">Foreign Born Population:</div>
-            <div class="progress-bar-container">
+            <div class="data-label">Foreign Born:</div>
+            <div class="progress-bar-container" data-tooltip="${Math.round(countyData.percent_foreign_born || 0)}%">
                 <div class="progress-bar" style="width: ${countyData.percent_foreign_born || 0}%;">
                     ${countyData.percent_foreign_born >= 5 ? formatPercent(countyData.percent_foreign_born) : ''}
                 </div>
             </div>
         </div>
+        
+        <div class="section-header">ECONOMIC (HOUSEHOLDS)</div>
+        
+        ${createBarChartHTML('Medi-Cal', medicalPercent, '#2874a6')}
+        ${createBarChartHTML('Cal Fresh', calfreshPercent, '#E68900')}
+        ${createBarChartHTML('Renter', renterPercent, '#7b1fa2')}
+        ${createDollarBarChartHTML('Household Income', householdIncome, '#4caf50')}
     `;
     
     // Destroy existing pie chart before replacing HTML
@@ -1338,6 +1739,8 @@ function populateCountyPanel() {
     // Update pie chart (use setTimeout to ensure DOM is updated)
     setTimeout(() => {
         updatePieChart(latinoPercent, whitePercent, blackPercent, asianPercent, otherPercent);
+        // Update layer visibility position after pie chart renders
+        setTimeout(updateLayerVisibilityPosition, 50);
     }, 10);
 }
 
@@ -1396,6 +1799,35 @@ async function loadData() {
     }
 }
 
+// Update layer visibility control position to be below data panel
+function updateLayerVisibilityPosition() {
+    if (window.innerWidth <= 768) return; // Only for desktop
+    
+    const dataPanel = document.getElementById('data-panel');
+    const layerControl = document.querySelector('.layer-visibility-control');
+    
+    if (dataPanel && layerControl) {
+        const panelVisible = dataPanel.style.display !== 'none';
+        
+        if (panelVisible && dataPanel.offsetHeight > 0) {
+            // Position directly below the data panel
+            const panelRect = dataPanel.getBoundingClientRect();
+            const panelBottom = panelRect.bottom;
+            const viewportHeight = window.innerHeight;
+            const distanceFromBottom = viewportHeight - panelBottom;
+            
+            // Position it with a small gap (10px) below the panel
+            layerControl.style.top = (panelBottom + 10) + 'px';
+            layerControl.style.bottom = 'auto';
+            layerControl.style.right = '0px';
+        } else {
+            // If panel is hidden, position at bottom
+            layerControl.style.bottom = '10px';
+            layerControl.style.top = 'auto';
+        }
+    }
+}
+
 // Helper functions for mobile-responsive panel
 function showDataPanel() {
     const panel = document.getElementById('data-panel');
@@ -1414,6 +1846,10 @@ function showDataPanel() {
         panel.style.display = 'block';
         panel.classList.remove('show');
     }
+    
+    // Update layer visibility control position after showing panel
+    // Use a longer delay to ensure DOM is fully rendered and panel height is calculated
+    setTimeout(updateLayerVisibilityPosition, 100);
 }
 
 function hideDataPanel() {
@@ -1510,6 +1946,8 @@ function initInfoPanelToggle() {
                     if (legendControl) {
                         legendControl.style.bottom = '';
                     }
+                    // Update layer visibility position
+                    updateLayerVisibilityPosition();
                 } else {
                     // Mobile: show toggle and ensure collapsed state
                     infoToggle.style.display = 'block';
@@ -1536,14 +1974,89 @@ function initInfoPanelToggle() {
     }
 }
 
+// Initialize sources modal
+function initSourcesModal() {
+    const modal = document.getElementById('sources-modal');
+    const sourcesLink = document.getElementById('sources-link');
+    const closeBtn = modal ? modal.querySelector('.modal-close') : null;
+    
+    if (!modal || !sourcesLink) return;
+    
+    // Open modal when Sources link is clicked
+    sourcesLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.style.display = 'block';
+    });
+    
+    // Close modal when X is clicked
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+function initTermsModal() {
+    const modal = document.getElementById('terms-modal');
+    const termsLink = document.getElementById('terms-link');
+    const closeBtn = modal ? modal.querySelector('.modal-close') : null;
+    
+    if (!modal || !termsLink) return;
+    
+    // Open modal when Terms link is clicked
+    termsLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.style.display = 'block';
+    });
+    
+    // Close modal when X is clicked
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+    
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+}
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
         loadData();
         initInfoPanelToggle();
+        initSourcesModal();
+        initTermsModal();
     });
 } else {
     loadData();
     initInfoPanelToggle();
+    initSourcesModal();
+    initTermsModal();
 }
 

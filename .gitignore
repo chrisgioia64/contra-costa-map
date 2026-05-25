@@ -1,5 +1,4 @@
 # Large GeoJSON files
-*.geojson
 
 # Large JSON files (uncomment if needed)
 # cities_final.json
@@ -27,6 +26,7 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
 
 
 
